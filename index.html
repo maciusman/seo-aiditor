@@ -326,6 +326,70 @@
             );
         }
 
+        // Export functions
+        function exportToCSV(results) {
+            try {
+                let csvContent = "Category,Check,Value,Pass,Score\n";
+
+                // Add category data
+                Object.entries(results.categories).forEach(([catName, catData]) => {
+                    Object.entries(catData.checks || {}).forEach(([checkName, checkData]) => {
+                        const value = (checkData.value || 'N/A').toString().replace(/,/g, ';');
+                        csvContent += `${catName},${checkName},${value},${checkData.pass},${checkData.score}\n`;
+                    });
+                });
+
+                csvContent += "\n\nSeverity,Title,Impact,Description,Fix\n";
+
+                // Add issues
+                Object.values(results.categories).forEach(catData => {
+                    (catData.issues || []).forEach(issue => {
+                        const desc = (issue.description || '').replace(/,/g, ';');
+                        const fix = (issue.fix || '').replace(/,/g, ';');
+                        csvContent += `${issue.severity},${issue.title},${issue.impact},"${desc}","${fix}"\n`;
+                    });
+                });
+
+                // Download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `seo_audit_${results.url.replace(/[^a-z0-9]/gi, '_')}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                alert('✅ Raport CSV został pobrany!');
+            } catch (err) {
+                alert('❌ Błąd eksportu CSV: ' + err.message);
+            }
+        }
+
+        function exportToJSON(results) {
+            try {
+                const jsonStr = JSON.stringify(results, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `seo_audit_${results.url.replace(/[^a-z0-9]/gi, '_')}.json`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                alert('✅ Raport JSON został pobrany!');
+            } catch (err) {
+                alert('❌ Błąd eksportu JSON: ' + err.message);
+            }
+        }
+
+        function exportToPDF(results) {
+            alert('📄 Funkcja PDF jest w rozwoju!\n\nUżyj CSV lub JSON w międzyczasie.\n\nAby dodać PDF export:\n1. Zainstaluj jsPDF: npm install jspdf\n2. Zobacz dokumentację w CONTRIBUTING.md');
+        }
+
         function AuditResults({ results, onNewAudit }) {
             const [expandedCategory, setExpandedCategory] = useState(null);
 
@@ -405,11 +469,23 @@
                                 >
                                     Nowy Audyt
                                 </button>
-                                <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                                <button
+                                    onClick={() => exportToPDF(results)}
+                                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+                                >
                                     📄 Pobierz PDF
                                 </button>
-                                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                                <button
+                                    onClick={() => exportToCSV(results)}
+                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                                >
                                     📊 Eksportuj CSV
+                                </button>
+                                <button
+                                    onClick={() => exportToJSON(results)}
+                                    className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
+                                >
+                                    📋 Eksportuj JSON
                                 </button>
                             </div>
                         </div>
@@ -419,11 +495,11 @@
                     <div className="space-y-4">
                         {Object.entries(results.categories).map(([categoryKey, categoryData]) => (
                             <div key={categoryKey} className="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
-                                <div
-                                    className="p-6 cursor-pointer"
-                                    onClick={() => setExpandedCategory(expandedCategory === categoryKey ? null : categoryKey)}
-                                >
-                                    <div className="flex items-center justify-between">
+                                <div className="p-6">
+                                    <div
+                                        className="flex items-center justify-between cursor-pointer"
+                                        onClick={() => setExpandedCategory(expandedCategory === categoryKey ? null : categoryKey)}
+                                    >
                                         <div className="flex items-center space-x-4 flex-1">
                                             <span className="text-3xl">{getCategoryIcon(categoryKey)}</span>
                                             <div className="flex-1">

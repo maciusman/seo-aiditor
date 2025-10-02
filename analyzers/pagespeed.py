@@ -87,12 +87,20 @@ def fetch_psi_data(url, strategy='mobile'):
 
     params = {
         'url': url,
-        'key': GOOGLE_PSI_API_KEY,
         'strategy': strategy,  # mobile lub desktop
         'category': 'performance'
     }
 
+    # Dodaj API key tylko jeśli jest ustawiony
+    if GOOGLE_PSI_API_KEY and GOOGLE_PSI_API_KEY != "YOUR_API_KEY_HERE":
+        params['key'] = GOOGLE_PSI_API_KEY
+
     response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
+
+    # Lepszy error handling
+    if response.status_code == 403:
+        raise Exception("403 Forbidden - Sprawdź uprawnienia API key w Google Cloud Console. Kliknij na API key → Edit → API restrictions → USUŃ restrykcje lub dodaj PageSpeed Insights API do listy dozwolonych.")
+
     response.raise_for_status()
 
     return response.json()
