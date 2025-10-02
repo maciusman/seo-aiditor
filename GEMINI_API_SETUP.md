@@ -21,20 +21,22 @@ This guide will help you get your **FREE** Google Gemini API key to enable AI-po
 
 ---
 
-### Step 2: Add API Key to Config
+### Step 2: Add API Keys to Config
 
-1. **Open `config.py`** in your project folder
+1. **Open `config_local.py`** in your project folder (already exists!)
 
-2. **Replace placeholder:**
+2. **Add both API keys:**
    ```python
-   # Find this line:
-   GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
+   # Google PageSpeed Insights API
+   GOOGLE_PSI_API_KEY = "YOUR_PAGESPEED_KEY_HERE"
 
-   # Replace with your actual key:
-   GEMINI_API_KEY = "AIzaSyC_YOUR_ACTUAL_KEY_HERE"
+   # Google Gemini API (AI Analysis)
+   GEMINI_API_KEY = "AIzaSyC_YOUR_ACTUAL_GEMINI_KEY_HERE"
    ```
 
 3. **Save the file**
+
+⚠️ **Note:** This file is gitignored - your keys stay private!
 
 ---
 
@@ -100,9 +102,10 @@ Once configured, the SEO Auditor will provide:
 **Cause:** API key is missing or invalid
 
 **Fix:**
-1. Check `config.py` has your real API key (not placeholder)
+1. Check `config_local.py` has your real API key (not placeholder)
 2. Verify key starts with `AIza...`
 3. Make sure there are no extra spaces or quotes
+4. Restart the backend: `python app.py`
 
 ---
 
@@ -139,8 +142,8 @@ Once configured, the SEO Auditor will provide:
 ## 🛡️ Security Best Practices
 
 ### ✅ DO:
-- Keep your API key private (don't share on GitHub)
-- Add `config.py` to `.gitignore` if sharing code
+- Keep your API keys in `config_local.py` (already gitignored!)
+- Never commit `config_local.py` to GitHub
 - Use environment variables in production:
   ```python
   import os

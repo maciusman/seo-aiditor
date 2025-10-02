@@ -148,11 +148,11 @@ pip install -r requirements.txt
 4. Wybierz "Create API key in new project"
 5. Skopiuj klucz (zaczyna się od `AIza...`)
 
-**W pliku `config.py` ustaw:**
+**W pliku `config_local.py` wstaw klucz:**
 ```python
 GEMINI_API_KEY = "AIzaSy_TWOJ_KLUCZ_TUTAJ"
-ENABLE_AI_ANALYSIS = True  # Ustaw False aby wyłączyć AI
 ```
+(Toggle AI: ustaw `ENABLE_AI_ANALYSIS = False` w `config.py` aby wyłączyć)
 
 **Limity darmowe:**
 - ✅ 1,500 zapytań/dzień
@@ -187,9 +187,9 @@ ENABLE_AI_ANALYSIS = True  # Ustaw False aby wyłączyć AI
 - ✅ Bez kosztów
 - ✅ Wystarczy na ~800 audytów dziennie
 
-### 3. Edytuj config.py
+### 3. Edytuj config_local.py
 
-Otwórz `config.py` i wstaw oba klucze:
+Otwórz `config_local.py` i wstaw oba klucze:
 
 ```python
 # PageSpeed API
@@ -197,14 +197,32 @@ GOOGLE_PSI_API_KEY = "TWOJ_PSI_KEY_TUTAJ"
 
 # Gemini AI (opcjonalny - ale bardzo zalecany!)
 GEMINI_API_KEY = "TWOJ_GEMINI_KEY_TUTAJ"
-ENABLE_AI_ANALYSIS = True
 ```
+
+⚠️ **Uwaga:** Plik `config_local.py` jest gitignored - Twoje klucze są bezpieczne!
 
 ---
 
 ## 🚀 Uruchomienie
 
-### Metoda 1: Backend + Frontend (pełna funkcjonalność)
+### ⚡ Metoda 1: Automatyczne uruchomienie (ZALECANE!)
+
+**Windows:**
+```bash
+# Kliknij dwukrotnie na:
+start.bat
+```
+
+**Mac/Linux:**
+```bash
+python start.py
+```
+
+Aplikacja uruchomi się automatycznie i otworzy w przeglądarce! 🎉
+
+---
+
+### 🔧 Metoda 2: Ręczne uruchomienie
 
 **Terminal 1 - Backend API:**
 ```bash

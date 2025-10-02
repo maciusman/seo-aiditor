@@ -173,7 +173,7 @@ def generate_ai_action_plan(url, audit_results):
 
     except Exception as e:
         results['error'] = str(e)
-        print(f"❌ AI Action Plan Error: {e}")
+        print(f"[ERROR] AI Action Plan Error: {e}")
 
     return results
 
@@ -185,7 +185,7 @@ def format_action_plan_for_display(action_plan):
     Returns formatted string
     """
     if 'error' in action_plan:
-        return f"❌ Action Plan Error: {action_plan['error']}"
+        return f"[ERROR] Action Plan Error: {action_plan['error']}"
 
     output = []
 

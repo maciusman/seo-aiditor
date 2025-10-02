@@ -163,7 +163,7 @@ def analyze_ai_content(url, html_content):
 
     except Exception as e:
         results['insights']['analysis_error'] = str(e)
-        print(f"❌ AI Content Analysis Error: {e}")
+        print(f"[ERROR] AI Content Analysis Error: {e}")
 
     return results
 

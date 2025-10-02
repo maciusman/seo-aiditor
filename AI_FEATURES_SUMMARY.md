@@ -153,17 +153,25 @@ ENABLE_AI_ANALYSIS = True  # Toggle on/off
 
 **Setup (5 minutes):**
 1. Get free Gemini API key: https://aistudio.google.com/apikey
-2. Edit `config.py` → paste key → save
+2. Edit `config_local.py` → paste both keys → save
+   ```python
+   GOOGLE_PSI_API_KEY = "your_pagespeed_key"
+   GEMINI_API_KEY = "your_gemini_key"
+   ```
 3. Run `python ai_engine.py` to test
 
-**Running Audits:**
+**Running Audits (Easy Way):**
+- **Windows:** Double-click `start.bat`
+- **Mac/Linux:** Run `python start.py`
+
+**Running Audits (Manual):**
 1. Start backend: `python app.py`
 2. Open frontend: `index.html` in browser
 3. Enter URL → Run Audit
 4. Scroll down to see AI sections (purple and green cards)
 
 **Toggling AI:**
-- Set `ENABLE_AI_ANALYSIS = False` in config.py to disable
+- Set `ENABLE_AI_ANALYSIS = False` in `config.py` to disable
 - App works fully without AI (backward compatible)
 
 ### For Developers

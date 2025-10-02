@@ -29,13 +29,13 @@ class AIAnalyzer:
 
             self.client = genai.Client(api_key=self.api_key)
             self.GenerateContentConfig = GenerateContentConfig
-            print("✅ Gemini AI Engine initialized successfully")
+            print("[OK] Gemini AI Engine initialized successfully")
         except ImportError:
-            print("❌ ERROR: google-genai library not installed")
+            print("[ERROR] google-genai library not installed")
             print("Run: pip install google-genai")
             self.client = None
         except Exception as e:
-            print(f"❌ ERROR initializing Gemini: {e}")
+            print(f"[ERROR] Initializing Gemini: {e}")
             self.client = None
 
     def is_available(self) -> bool:
@@ -73,7 +73,7 @@ class AIAnalyzer:
             return response.text
         except Exception as e:
             error_msg = str(e)
-            print(f"❌ AI Error: {error_msg}")
+            print(f"[ERROR] AI Error: {error_msg}")
             return json.dumps({"error": error_msg})
 
     def analyze_text(self, text: str, prompt: str, json_output: bool = True) -> str:
@@ -106,7 +106,7 @@ class AIAnalyzer:
             return response.text
         except Exception as e:
             error_msg = str(e)
-            print(f"❌ AI Error: {error_msg}")
+            print(f"[ERROR] AI Error: {error_msg}")
             return json.dumps({"error": error_msg})
 
     def parse_json_response(self, response: str) -> Dict[str, Any]:
@@ -128,7 +128,7 @@ class AIAnalyzer:
 
             return json.loads(response)
         except json.JSONDecodeError as e:
-            print(f"❌ JSON Parse Error: {e}")
+            print(f"[ERROR] JSON Parse Error: {e}")
             print(f"Response: {response[:200]}...")
             return {"error": "Invalid JSON response", "raw": response}
 
@@ -153,7 +153,7 @@ class AIAnalyzer:
                     return parsed
 
                 if attempt < max_retries:
-                    print(f"⚠️ Retry {attempt + 1}/{max_retries}...")
+                    print(f"[WARN] Retry {attempt + 1}/{max_retries}...")
                     continue
 
                 return parsed
@@ -184,7 +184,7 @@ def create_ai_analyzer(api_key: str, model: str = "gemini-2.5-flash") -> Optiona
             return analyzer
         return None
     except Exception as e:
-        print(f"❌ Failed to create AI Analyzer: {e}")
+        print(f"[ERROR] Failed to create AI Analyzer: {e}")
         return None
 
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
     ai = create_ai_analyzer(GEMINI_API_KEY)
 
     if ai and ai.is_available():
-        print("✅ AI Engine is ready!")
+        print("[OK] AI Engine is ready!")
 
         # Test simple text analysis
         test_prompt = "Analyze this text and return JSON with: {sentiment: 'positive'|'negative', summary: 'brief summary'}"
@@ -207,4 +207,4 @@ if __name__ == "__main__":
         result = ai.analyze_text(test_text, test_prompt)
         print(f"\nTest Result: {result}")
     else:
-        print("❌ AI Engine not available - check API key in config.py")
+        print("[ERROR] AI Engine not available - check API key in config_local.py")
