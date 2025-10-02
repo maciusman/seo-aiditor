@@ -1,7 +1,7 @@
 # config.py
 
 # Google PageSpeed Insights API
-GOOGLE_PSI_API_KEY = "AIzaSyBrKorcVeqRCUheVO9maidNgmAmrfUkUWY"  # Wstaw swój klucz
+GOOGLE_PSI_API_KEY = "YOUR_API_KEY_HERE"  # Wstaw swój klucz
 
 # Google Gemini API (AI Analysis)
 GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"  # Wstaw swój klucz Gemini

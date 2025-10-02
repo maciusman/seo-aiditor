@@ -23,6 +23,29 @@ Kompleksowa aplikacja React + Python do przeprowadzania szczegółowych audytów
 
 ## ✨ Funkcje
 
+### 🤖 **NEW: AI-Powered Analysis (Gemini 2.5 Flash)**
+- **AI Content Quality Analysis**
+  - E-E-A-T signals detection (Experience, Expertise, Authoritativeness, Trust)
+  - Search intent matching (informational/transactional/navigational/commercial)
+  - Content depth and gap analysis
+  - Keyword naturalness scoring
+  - Competitor advantage insights
+
+- **AI Personalized Action Plan**
+  - 30/60/90-day implementation roadmap
+  - Quick wins identification (high impact, low effort)
+  - Prioritized tasks with impact estimates
+  - Tool recommendations
+  - Content strategy suggestions
+  - Estimated score progression
+
+💰 **Cost:** ~$0.01-0.03 per audit (practically FREE!)
+📊 **Free Tier:** 1,500 requests/day
+
+[→ See AI Setup Guide](GEMINI_API_SETUP.md)
+
+---
+
 ### Analiza SEO (50+ parametrów):
 
 **🔧 Fundamenty Techniczne (20% wagi)**
@@ -79,6 +102,7 @@ Kompleksowa aplikacja React + Python do przeprowadzania szczegółowych audytów
 - **Requests** - HTTP client
 - **textstat** - readability analysis
 - **validators** - URL validation
+- **google-genai** - Gemini AI integration
 
 ### Frontend:
 - **React 18** - UI framework
@@ -86,7 +110,8 @@ Kompleksowa aplikacja React + Python do przeprowadzania szczegółowych audytów
 - **Chart.js** - wizualizacje
 - **Vanilla JS** - brak build tools
 
-### API:
+### AI & APIs:
+- **Google Gemini 2.5 Flash** - AI content analysis & action plans
 - **Google PageSpeed Insights API** - Core Web Vitals
 
 ---
@@ -113,7 +138,33 @@ pip install -r requirements.txt
 
 ## ⚙️ Konfiguracja
 
-### 1. Google PageSpeed Insights API Key
+### 1. Google Gemini API Key (AI Features) 🤖
+
+**NOWE! Aby włączyć funkcje AI (5 minut):**
+
+1. Przejdź do [Google AI Studio](https://aistudio.google.com/apikey)
+2. Zaloguj się (konto Gmail)
+3. Kliknij "Create API Key"
+4. Wybierz "Create API key in new project"
+5. Skopiuj klucz (zaczyna się od `AIza...`)
+
+**W pliku `config.py` ustaw:**
+```python
+GEMINI_API_KEY = "AIzaSy_TWOJ_KLUCZ_TUTAJ"
+ENABLE_AI_ANALYSIS = True  # Ustaw False aby wyłączyć AI
+```
+
+**Limity darmowe:**
+- ✅ 1,500 zapytań/dzień
+- ✅ 1 milion tokenów/minutę
+- ✅ ~50 audytów dziennie CAŁKOWICIE ZA DARMO
+- 💰 Koszt audytu: $0.01-0.03 (prawie darmowe!)
+
+📚 **Pełna instrukcja:** [GEMINI_API_SETUP.md](GEMINI_API_SETUP.md)
+
+---
+
+### 2. Google PageSpeed Insights API Key
 
 **Aby uzyskać darmowy API key (5 minut):**
 
@@ -136,12 +187,17 @@ pip install -r requirements.txt
 - ✅ Bez kosztów
 - ✅ Wystarczy na ~800 audytów dziennie
 
-### 2. Edytuj config.py
+### 3. Edytuj config.py
 
-Otwórz `config.py` i wstaw swój API key:
+Otwórz `config.py` i wstaw oba klucze:
 
 ```python
-GOOGLE_PSI_API_KEY = "TWOJ_API_KEY_TUTAJ"
+# PageSpeed API
+GOOGLE_PSI_API_KEY = "TWOJ_PSI_KEY_TUTAJ"
+
+# Gemini AI (opcjonalny - ale bardzo zalecany!)
+GEMINI_API_KEY = "TWOJ_GEMINI_KEY_TUTAJ"
+ENABLE_AI_ANALYSIS = True
 ```
 
 ---
