@@ -59,35 +59,14 @@ def generate_ai_action_plan(url, audit_results):
         'top_issues': audit_results.get('all_issues', [])[:10]  # Top 10
     }
 
-    # Detect language from AI content insights
-    detected_language = 'en'
-    if 'ai_content' in audit_results.get('categories', {}):
-        detected_language = audit_results['categories']['ai_content'].get('language', 'en')
-
-    # Language-specific instructions
-    lang_instructions = {
-        'pl': "Odpowiedz PO POLSKU. Stwórz plan działania w języku polskim.",
-        'en': "Respond in ENGLISH. Create action plan in English.",
-        'de': "Antworten Sie auf DEUTSCH. Erstellen Sie einen Aktionsplan auf Deutsch.",
-        'es': "Responda en ESPAÑOL. Cree un plan de acción en español.",
-        'fr': "Répondez en FRANÇAIS. Créez un plan d'action en français."
-    }
-
-    lang_instruction = lang_instructions.get(detected_language, lang_instructions['en'])
-
     # Prepare prompt for action plan
-    prompt = f"""{lang_instruction}
+    prompt = f"""
+    Based on this SEO audit data, create a personalized action plan.
 
-You are a senior SEO strategist creating a BATTLE-TESTED action plan for a real client.
+    AUDIT SUMMARY:
+    {json.dumps(audit_summary, indent=2)}
 
-CRITICAL: This plan must deliver MEASURABLE business results, not just improve numbers.
-
-AUDIT SUMMARY:
-{json.dumps(audit_summary, indent=2)}
-
-**CRITICAL: Your entire response must be ONLY valid JSON. No markdown formatting, no code blocks, no explanations. Start with { and end with }. Pure JSON only.**
-
-Create a JSON response with this EXACT structure:
+    Provide a JSON response with this exact structure:
     {{
         "overall_strategy": {{
             "primary_focus": "<what to focus on first>",
@@ -97,50 +76,41 @@ Create a JSON response with this EXACT structure:
         }},
         "quick_wins": [
             {{
-                "title": "<specific action title>",
-                "description": "<what exactly to do>",
-                "estimated_time": "<realistic: 15min|30min|1h|2h|4h>",
-                "expected_impact": "<be specific: +5% traffic, +10 score points, etc>",
-                "business_impact": "<revenue/leads/conversions impact>",
-                "difficulty": "<easy|medium|hard>",
-                "tools_needed": ["<tool 1>", "<tool 2>"],
-                "implementation_steps": ["<step 1 with details>", "<step 2>", ...]
+                "title": "<action title>",
+                "description": "<what to do>",
+                "estimated_time": "<e.g., 30 minutes>",
+                "expected_impact": "<score improvement estimate>",
+                "implementation_steps": ["<step 1>", "<step 2>", ...]
             }}
         ],
         "roadmap_30_days": [
             {{
                 "priority": <1-10>,
-                "action": "<specific action>",
-                "category": "<technical|content|onpage|indexing|conversion>",
-                "description": "<what to do and why it matters>",
-                "success_criteria": "<measurable KPI: traffic, rankings, conversions>",
-                "estimated_impact": "<specific numbers or % if possible>",
-                "dependencies": ["<what needs to be done first>"],
-                "owner": "<who should do this: developer|marketer|seo|copywriter>"
+                "action": "<action title>",
+                "category": "<technical|content|onpage|indexing>",
+                "description": "<detailed description>",
+                "success_criteria": "<how to measure success>",
+                "estimated_impact": "<low|medium|high>"
             }}
         ],
         "roadmap_60_days": [
             {{
                 "priority": <1-10>,
-                "action": "<specific action>",
+                "action": "<action title>",
                 "category": "<category>",
-                "description": "<detailed description with business context>",
-                "success_criteria": "<measurable outcome>",
-                "estimated_impact": "<business impact>",
-                "dependencies": ["<prerequisites>"],
-                "owner": "<role>"
+                "description": "<description>",
+                "success_criteria": "<criteria>",
+                "estimated_impact": "<impact>"
             }}
         ],
         "roadmap_90_days": [
             {{
                 "priority": <1-10>,
-                "action": "<strategic action>",
+                "action": "<action title>",
                 "category": "<category>",
-                "description": "<long-term improvement with reasoning>",
-                "success_criteria": "<measurable goal>",
-                "estimated_impact": "<cumulative business impact>",
-                "dependencies": ["<what must be completed first>"],
-                "owner": "<role>"
+                "description": "<description>",
+                "success_criteria": "<criteria>",
+                "estimated_impact": "<impact>"
             }}
         ],
         "estimated_score_progression": {{
@@ -159,40 +129,15 @@ Create a JSON response with this EXACT structure:
             }}
         ],
         "content_strategy": {{
-            "recommended_content_types": ["<type with reasoning>", ...],
-            "keyword_opportunities": ["<keyword with volume estimate>", ...],
-            "content_gaps": ["<specific gap with business impact>", ...],
-            "competitive_angle": "<unique positioning vs competitors>"
-        }},
-        "risk_assessment": {{
-            "low_hanging_fruit": ["<easy wins with high ROI>"],
-            "potential_pitfalls": ["<what could go wrong>"],
-            "resource_constraints": ["<likely bottlenecks>"],
-            "competitive_threats": ["<what competitors might do>"]
-        }},
-        "executive_summary": "<2-3 sentences: current state, primary blocker, expected outcome if plan executed>",
-        "success_metrics": [
-            {{
-                "metric": "<specific KPI>",
-                "current": "<baseline>",
-                "target_30d": "<realistic target>",
-                "target_90d": "<ambitious but achievable>"
-            }}
-        ]
+            "recommended_content_types": ["<type 1>", "<type 2>", ...],
+            "keyword_opportunities": ["<keyword 1>", "<keyword 2>", ...],
+            "content_gaps": ["<gap 1>", "<gap 2>", ...],
+            "competitor_insights": "<insights from competitive analysis>"
+        }}
     }}
 
-CRITICAL INSTRUCTIONS:
-- Be BRUTALLY HONEST about current state - no sugar coating
-- Prioritize by BUSINESS IMPACT, not just SEO metrics
-- Every action must have MEASURABLE outcome
-- Estimate time/resources REALISTICALLY - no fantasy timelines
-- Focus on what will ACTUALLY move the needle for this specific site
-- Identify the #1 blocker preventing better rankings
-- Think like a business consultant advising on ROI
-- Use SPECIFIC numbers whenever possible
-- Consider the competitive landscape
-- Highlight dependencies and risks
-"""
+    Be specific, actionable, and realistic. Prioritize high-impact, achievable tasks.
+    """
 
     # Analyze with AI
     try:

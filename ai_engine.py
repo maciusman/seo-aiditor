@@ -60,14 +60,22 @@ class AIAnalyzer:
         try:
             config_tools = self.tools if use_url_context else []
 
+            # NOTE: response_mime_type cannot be used with tools (URL Context)
+            # So we rely on prompt instructions for JSON formatting
+            config_params = {
+                'temperature': 0.7,
+            }
+
+            if config_tools:
+                config_params['tools'] = config_tools
+            else:
+                # Only use response_mime_type if NOT using tools
+                config_params['response_mime_type'] = "application/json"
+
             response = self.client.models.generate_content(
                 model=self.model,
                 contents=f"{prompt}\n\nURL to analyze: {url}",
-                config=self.GenerateContentConfig(
-                    tools=config_tools,
-                    temperature=0.7,  # Balance between creativity and consistency
-                    response_mime_type="application/json"  # Structured output!
-                )
+                config=self.GenerateContentConfig(**config_params)
             )
 
             return response.text
