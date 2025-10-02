@@ -134,8 +134,30 @@ Your selection directly impacts the quality of the final audit.
             use_url_context=True
         )
 
+        # Clean and parse JSON response
+        # Sometimes Gemini returns markdown code blocks or extra text
+        cleaned_response = response.strip()
+
+        # Remove markdown code blocks if present
+        if cleaned_response.startswith('```json'):
+            cleaned_response = cleaned_response.replace('```json', '', 1)
+        if cleaned_response.startswith('```'):
+            cleaned_response = cleaned_response.replace('```', '', 1)
+        if cleaned_response.endswith('```'):
+            cleaned_response = cleaned_response.rsplit('```', 1)[0]
+
+        cleaned_response = cleaned_response.strip()
+
+        # Try to find JSON object in response
+        if not cleaned_response.startswith('{'):
+            # Try to find first { and last }
+            start = cleaned_response.find('{')
+            end = cleaned_response.rfind('}')
+            if start != -1 and end != -1 and end > start:
+                cleaned_response = cleaned_response[start:end+1]
+
         # Parse JSON response
-        result = json.loads(response)
+        result = json.loads(cleaned_response)
 
         # Validate required fields
         if 'site_type' not in result or 'selected_pages' not in result:
@@ -160,12 +182,18 @@ Your selection directly impacts the quality of the final audit.
         }
 
     except json.JSONDecodeError as e:
+        print(f"[ERROR] JSON Parse Error: {str(e)}")
+        print(f"[DEBUG] Raw response (first 500 chars): {response[:500] if 'response' in locals() else 'N/A'}")
+        print(f"[DEBUG] Cleaned response (first 500 chars): {cleaned_response[:500] if 'cleaned_response' in locals() else 'N/A'}")
         return {
             'success': False,
             'error': f'Failed to parse AI response as JSON: {str(e)}',
-            'raw_response': response if 'response' in locals() else ''
+            'raw_response': response[:1000] if 'response' in locals() else ''
         }
     except Exception as e:
+        print(f"[ERROR] AI Site Structure Analysis failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {
             'success': False,
             'error': f'AI analysis failed: {str(e)}'
