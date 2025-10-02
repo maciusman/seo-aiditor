@@ -23,24 +23,58 @@ Kompleksowa aplikacja React + Python do przeprowadzania szczegółowych audytów
 
 ## ✨ Funkcje
 
-### 🤖 **NEW: AI-Powered Analysis (Gemini 2.5 Flash)**
+### 🌐 **NEW: Multi-Page Intelligent Site Analysis**
+
+**Cała witryna, nie tylko jedna strona!**
+
+SEO AIditor analizuje teraz do **5 stron jednocześnie** w podejściu **holistycznym**:
+
+1. **AI wykrywa typ witryny** (e-commerce/usługi/blog/firma)
+2. **AI wybiera 4 reprezentatywne strony** (np. kategoria, produkt, blog, o nas)
+3. **AI analizuje wszystko razem** jako jedną spójną strategię
+
+**Co zyskujesz:**
+- 🎨 **Template-level insights** - Napraw 1 szablon = napraw dziesiątki stron!
+- 📊 **Holistic scoring** - Całościowa ocena SEO witryny
+- 🎯 **Scalable recommendations** - Zmiany wpływające na wiele stron
+- 🚀 **Conversion funnel analysis** - Analiza całego lejka sprzedażowego
+- 📅 **Strategic roadmap** - Plan działania na Week 1 / Month 1 / Month 3
+
+**Nowy UI z zakładkami:**
+- **Overview** - Podsumowanie + wyniki
+- **Pages** - Szczegóły każdej strony (sidebar/dropdown)
+- **Templates** - Skalowalne naprawy szablonów ⭐
+- **Issues** - Wszystkie problemy (sortowanie/filtrowanie)
+- **Strategy** - Roadmap + lejek konwersji
+
+💰 **Cost:** ~$0.05 per multi-page audit (still practically FREE!)
+📱 **Mobile-first UI** - Świetnie działa na telefonach i tabletach
+
+[→ See Multi-Page Documentation](MULTI_PAGE_ANALYSIS.md)
+
+---
+
+### 🤖 **AI-Powered Analysis (Gemini 2.5 Flash)**
 - **AI Content Quality Analysis**
+  - Auto language detection (PL/EN/DE/ES/FR)
   - E-E-A-T signals detection (Experience, Expertise, Authoritativeness, Trust)
   - Search intent matching (informational/transactional/navigational/commercial)
   - Content depth and gap analysis
-  - Keyword naturalness scoring
+  - Business value assessment (audience clarity, value prop, differentiation)
+  - Conversion optimization analysis
   - Competitor advantage insights
 
 - **AI Personalized Action Plan**
   - 30/60/90-day implementation roadmap
   - Quick wins identification (high impact, low effort)
   - Prioritized tasks with impact estimates
-  - Tool recommendations
-  - Content strategy suggestions
-  - Estimated score progression
+  - Role assignments (developer/marketer/copywriter)
+  - Risk assessment
+  - Success metrics
+  - Brutally honest recommendations
 
-💰 **Cost:** ~$0.01-0.03 per audit (practically FREE!)
-📊 **Free Tier:** 1,500 requests/day
+💰 **Cost (single-page):** ~$0.01-0.03 per audit (practically FREE!)
+📊 **Free Tier:** 1,500 requests/day = ~75,000 multi-page audits/month!
 
 [→ See AI Setup Guide](GEMINI_API_SETUP.md)
 
