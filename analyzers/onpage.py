@@ -9,7 +9,7 @@ from utils import is_internal_link, get_domain
 
 def analyze_onpage(url, html_content):
     """Analiza elementów on-page"""
-    soup = BeautifulSoup(html_content, 'lxml')
+    soup = BeautifulSoup(html_content, 'html.parser')
     results = {
         'score': 0,
         'checks': {},

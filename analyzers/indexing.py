@@ -12,7 +12,7 @@ def analyze_indexing(url, html_content):
         'issues': []
     }
 
-    soup = BeautifulSoup(html_content, 'lxml')
+    soup = BeautifulSoup(html_content, 'html.parser')
     base_domain = url.rstrip('/')
 
     # 1. Robots.txt

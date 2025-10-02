@@ -12,7 +12,7 @@ def analyze_content(html_content):
         'issues': []
     }
 
-    soup = BeautifulSoup(html_content, 'lxml')
+    soup = BeautifulSoup(html_content, 'html.parser')
 
     # Usuń script i style z analizy
     for script in soup(['script', 'style', 'nav', 'footer', 'header']):

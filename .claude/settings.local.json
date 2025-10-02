@@ -6,7 +6,9 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: SEO AIditor - Profesjonalne Narzędzie do Audytu SEO\n\n🚀 Funkcje:\n- Pełna analiza SEO (50+ parametrów)\n- Backend Python z Flask API\n- Frontend React z Tailwind CSS\n- Google PageSpeed Insights integration\n- Eksport do CSV/JSON\n- Scoring algorithm (0-100)\n- Quick Wins recommendations\n\n📊 Kategorie audytu:\n- Fundamenty Techniczne (20%)\n- On-Page SEO (25%)\n- Indeksowanie (20%)\n- Jakość Treści (20%)\n- Wydajność (15%)\n\n🎨 Wygenerowane z Claude Code\nhttps://claude.com/claude-code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(gh repo create:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(pip install:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []
