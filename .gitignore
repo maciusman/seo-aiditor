@@ -46,6 +46,7 @@ logs/
 
 # API Keys (IMPORTANT!)
 config_local.py
+*_local.py
 
 # Cache
 .cache/

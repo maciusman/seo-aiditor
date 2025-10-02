@@ -1,10 +1,14 @@
 # config.py
 
-# Google PageSpeed Insights API
-GOOGLE_PSI_API_KEY = "YOUR_API_KEY_HERE"  # Wstaw swój klucz
+# Import local API keys (if file exists)
+try:
+    from config_local import GOOGLE_PSI_API_KEY, GEMINI_API_KEY
+except ImportError:
+    # Default placeholders if config_local.py doesn't exist
+    GOOGLE_PSI_API_KEY = "YOUR_API_KEY_HERE"  # Wstaw swój klucz
+    GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"  # Wstaw swój klucz Gemini
 
 # Google Gemini API (AI Analysis)
-GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"  # Wstaw swój klucz Gemini
 GEMINI_MODEL = "gemini-2.5-flash"  # Model AI
 ENABLE_AI_ANALYSIS = True  # Toggle AI features on/off
 
