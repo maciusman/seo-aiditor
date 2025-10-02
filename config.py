@@ -12,6 +12,11 @@ except ImportError:
 GEMINI_MODEL = "gemini-2.5-flash"  # Model AI
 ENABLE_AI_ANALYSIS = True  # Toggle AI features on/off
 
+# Multi-Page Analysis
+ENABLE_MULTI_PAGE_ANALYSIS = True  # Enable intelligent multi-page audit
+MAX_PAGES_TO_ANALYZE = 5  # Maximum pages per audit (including homepage)
+MULTI_PAGE_TIMEOUT = 60  # Total timeout for multi-page analysis (seconds)
+
 # Timeouts
 REQUEST_TIMEOUT = 10  # sekundy
 PSI_TIMEOUT = 30  # PSI może trwać dłużej
