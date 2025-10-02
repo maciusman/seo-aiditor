@@ -6,7 +6,9 @@ from analyzers.onpage import analyze_onpage
 from analyzers.indexing import analyze_indexing
 from analyzers.content import analyze_content
 from analyzers.pagespeed import analyze_pagespeed
-from config import WEIGHTS
+from analyzers.ai_content import analyze_ai_content
+from analyzers.ai_action_plan import generate_ai_action_plan
+from config import WEIGHTS, ENABLE_AI_ANALYSIS
 
 def run_audit(url):
     """Uruchom pełny audyt SEO"""
@@ -64,6 +66,19 @@ def run_audit(url):
         print(f"    Warning: PageSpeed failed: {e}")
         results['categories']['pagespeed'] = {'score': 0, 'error': str(e)}
 
+    # AI Content Analysis (optional, może zająć chwilę)
+    if ENABLE_AI_ANALYSIS:
+        print("  - AI Content Quality analysis (Gemini 2.5 Flash)...")
+        try:
+            results['categories']['ai_content'] = analyze_ai_content(url, html_content)
+            print(f"    AI Content Score: {results['categories']['ai_content'].get('score', 0)}/100")
+        except Exception as e:
+            print(f"    Warning: AI Content analysis failed: {e}")
+            results['categories']['ai_content'] = {'score': 0, 'error': str(e), 'insights': {}}
+    else:
+        print("  - AI analysis disabled in config")
+        results['categories']['ai_content'] = {'score': 0, 'insights': {'disabled': True}}
+
     # 4. Oblicz finalny score
     final_score = calculate_final_score(results['categories'])
     results['final_score'] = final_score
@@ -83,6 +98,19 @@ def run_audit(url):
         issue for issue in all_issues
         if issue['impact'] >= 6 and issue['severity'] in ['important', 'recommendation']
     ][:5]
+
+    # 7. AI Action Plan (personalized recommendations)
+    if ENABLE_AI_ANALYSIS:
+        print("  - Generating AI Action Plan...")
+        try:
+            results['ai_action_plan'] = generate_ai_action_plan(url, results)
+            if results['ai_action_plan'].get('success'):
+                print(f"    ✓ Generated action plan with {len(results['ai_action_plan'].get('quick_wins', []))} AI quick wins")
+        except Exception as e:
+            print(f"    Warning: AI Action Plan failed: {e}")
+            results['ai_action_plan'] = {'error': str(e)}
+    else:
+        results['ai_action_plan'] = {'disabled': True}
 
     print("Audit complete!")
     return results

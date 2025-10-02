@@ -3,6 +3,11 @@
 # Google PageSpeed Insights API
 GOOGLE_PSI_API_KEY = "AIzaSyBrKorcVeqRCUheVO9maidNgmAmrfUkUWY"  # Wstaw swój klucz
 
+# Google Gemini API (AI Analysis)
+GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"  # Wstaw swój klucz Gemini
+GEMINI_MODEL = "gemini-2.5-flash"  # Model AI
+ENABLE_AI_ANALYSIS = True  # Toggle AI features on/off
+
 # Timeouts
 REQUEST_TIMEOUT = 10  # sekundy
 PSI_TIMEOUT = 30  # PSI może trwać dłużej
