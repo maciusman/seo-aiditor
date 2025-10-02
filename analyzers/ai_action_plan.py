@@ -85,7 +85,7 @@ CRITICAL: This plan must deliver MEASURABLE business results, not just improve n
 AUDIT SUMMARY:
 {json.dumps(audit_summary, indent=2)}
 
-**CRITICAL: Your entire response must be ONLY valid JSON. No markdown formatting, no code blocks, no explanations. Start with { and end with }. Pure JSON only.**
+**CRITICAL: Your entire response must be ONLY valid JSON. No markdown formatting, no code blocks, no explanations. Start with opening brace and end with closing brace. Pure JSON only.**
 
 Create a JSON response with this EXACT structure:
     {{
