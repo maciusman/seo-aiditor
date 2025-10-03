@@ -79,9 +79,17 @@ Think: "If I fix this template, how many pages improve?"
 **PAGES TO ANALYZE TOGETHER:**
 {pages_formatted}
 
-**CRITICAL: Your entire response must be ONLY valid JSON (no markdown, no code blocks, no explanation).**
+**CRITICAL JSON REQUIREMENTS:**
+1. Your ENTIRE response must be ONLY valid, parseable JSON
+2. NO markdown, NO code blocks (```), NO explanations outside JSON
+3. Start with {{ and end with }}
+4. ALL strings must use double quotes ("), not single quotes (')
+5. NO trailing commas in arrays or objects
+6. ALL object keys must be quoted
+7. Escape special characters in strings (quotes, backslashes, newlines)
+8. Test mentally that the JSON is valid before responding
 
-Start with opening brace and end with closing brace.
+**IMPORTANT:** If your JSON is invalid, the entire analysis will fail!
 
 **REQUIRED JSON STRUCTURE:**
 
@@ -268,8 +276,61 @@ Be specific, actionable, and brutally honest about opportunities and problems.
 
     except json.JSONDecodeError as e:
         print(f"[ERROR] Multi-page JSON Parse Error: {str(e)}")
-        print(f"[DEBUG] Raw response (first 500 chars): {response[:500] if 'response' in locals() else 'N/A'}")
-        print(f"[DEBUG] Cleaned response (first 500 chars): {cleaned_response[:500] if 'cleaned_response' in locals() else 'N/A'}")
+        print(f"[DEBUG] Error position: line {e.lineno}, column {e.colno}")
+        print(f"[DEBUG] Response length: {len(response) if 'response' in locals() else 0} chars")
+
+        # Show context around error
+        if 'cleaned_response' in locals() and hasattr(e, 'pos') and e.pos:
+            start = max(0, e.pos - 200)
+            end = min(len(cleaned_response), e.pos + 200)
+            print(f"[DEBUG] Context around error (pos {e.pos}):")
+            print(f"...{cleaned_response[start:end]}...")
+        else:
+            print(f"[DEBUG] Raw response (first 1000 chars): {response[:1000] if 'response' in locals() else 'N/A'}")
+            print(f"[DEBUG] Cleaned response (first 1000 chars): {cleaned_response[:1000] if 'cleaned_response' in locals() else 'N/A'}")
+
+        # Save full response to temp file for debugging
+        try:
+            import tempfile
+            import os
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='_ai_response.json', prefix='seo_aiditor_') as f:
+                f.write(cleaned_response if 'cleaned_response' in locals() else response)
+                debug_file = f.name
+            print(f"[DEBUG] Full response saved to: {debug_file}")
+        except Exception as save_err:
+            print(f"[DEBUG] Could not save debug file: {save_err}")
+
+        # Try to repair common JSON issues
+        if 'cleaned_response' in locals():
+            print("[DEBUG] Attempting JSON repair...")
+            repaired = cleaned_response
+
+            # Try to complete truncated JSON by adding closing braces
+            open_braces = repaired.count('{') - repaired.count('}')
+            open_brackets = repaired.count('[') - repaired.count(']')
+
+            if open_braces > 0 or open_brackets > 0:
+                print(f"[DEBUG] Detected unclosed braces: {open_braces} {{, {open_brackets} [")
+                repaired = repaired.rstrip(',\n\r\t ')  # Remove trailing commas
+                repaired += '\n' + ']' * open_brackets + '\n' + '}' * open_braces
+
+                try:
+                    result = json.loads(repaired)
+                    print("[DEBUG] JSON repair successful!")
+
+                    # Validate required fields
+                    required_fields = ['holistic_score', 'template_insights', 'scalable_recommendations']
+                    for field in required_fields:
+                        if field not in result:
+                            print(f"[WARNING] Repaired JSON missing field: {field}")
+
+                    return {
+                        'success': True,
+                        **result
+                    }
+                except json.JSONDecodeError as e2:
+                    print(f"[DEBUG] JSON repair failed: {e2}")
+
         return {
             'success': False,
             'error': f'Failed to parse AI response as JSON: {str(e)}',
