@@ -1,12 +1,62 @@
 # config.py
+import os
 
-# Import local API keys (if file exists)
-try:
-    from config_local import GOOGLE_PSI_API_KEY, GEMINI_API_KEY
-except ImportError:
-    # Default placeholders if config_local.py doesn't exist
-    GOOGLE_PSI_API_KEY = "YOUR_API_KEY_HERE"  # Wstaw swój klucz
-    GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"  # Wstaw swój klucz Gemini
+# ========================================
+# ENVIRONMENT DETECTION
+# ========================================
+
+def detect_environment():
+    """
+    Automatically detect if running in local development or production.
+
+    Returns:
+        str: 'local' or 'production'
+    """
+    # Method 1: Check for config_local.py (local development)
+    if os.path.exists(os.path.join(os.path.dirname(__file__), 'config_local.py')):
+        return 'local'
+
+    # Method 2: Explicit PRODUCTION environment variable
+    if os.getenv('PRODUCTION', '').lower() in ('true', '1', 'yes'):
+        return 'production'
+
+    # Method 3: PythonAnywhere detection
+    if 'PYTHONANYWHERE_DOMAIN' in os.environ:
+        return 'production'
+
+    # Method 4: Other hosting platforms
+    if any(key in os.environ for key in ['RENDER', 'RAILWAY_ENVIRONMENT', 'FLY_APP_NAME']):
+        return 'production'
+
+    # Default: assume local development
+    return 'local'
+
+# Detect current environment
+ENV = detect_environment()
+IS_PRODUCTION = (ENV == 'production')
+
+# ========================================
+# API KEYS CONFIGURATION
+# ========================================
+
+if ENV == 'local':
+    # Local development: Import from config_local.py
+    try:
+        from config_local import GOOGLE_PSI_API_KEY, GEMINI_API_KEY
+        REQUIRE_USER_API_KEYS = False
+        print(f"[CONFIG] Running in LOCAL mode - using config_local.py")
+    except ImportError:
+        # config_local.py doesn't exist - fallback to environment or placeholders
+        GOOGLE_PSI_API_KEY = os.getenv('GOOGLE_PSI_API_KEY', 'YOUR_API_KEY_HERE')
+        GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'YOUR_GEMINI_API_KEY_HERE')
+        REQUIRE_USER_API_KEYS = False
+        print(f"[CONFIG] Warning: config_local.py not found - using environment variables or placeholders")
+else:
+    # Production: Users must provide their own API keys
+    GOOGLE_PSI_API_KEY = None
+    GEMINI_API_KEY = None
+    REQUIRE_USER_API_KEYS = True
+    print(f"[CONFIG] Running in PRODUCTION mode - users must provide API keys")
 
 # Google Gemini API (AI Analysis)
 GEMINI_MODEL = "gemini-2.5-flash"  # Model AI
