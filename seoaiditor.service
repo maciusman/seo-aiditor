@@ -1,0 +1,16 @@
+[Unit]
+Description=SEO AIditor - Gunicorn WSGI server
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/var/www/seo-aiditor
+Environment="PATH=/var/www/seo-aiditor/venv/bin"
+Environment="PRODUCTION=true"
+ExecStart=/var/www/seo-aiditor/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:5000 wsgi:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
