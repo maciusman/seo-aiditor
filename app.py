@@ -1,7 +1,9 @@
 # app.py - Flask API Server
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import json
+import datetime
+from urllib.parse import urlparse
 from audit_engine import run_audit
 
 app = Flask(__name__)
@@ -93,6 +95,192 @@ def generate_csv(results):
         csv_lines.append(f"{issue.get('severity', '')},{issue.get('title', '')},{issue.get('impact', 0)},{issue.get('description', '')},{issue.get('fix', '')}")
 
     return "\n".join(csv_lines)
+
+@app.route('/api/export/html', methods=['POST'])
+def export_html():
+    try:
+        data = request.get_json()
+        results = data.get('results')
+
+        if not results:
+            return jsonify({'error': 'Results are required'}), 400
+
+        # Generate standalone HTML
+        html_content = generate_standalone_html(results)
+
+        # Create filename
+        url_part = urlparse(results.get('url', 'report')).netloc.replace('.', '_')
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'seo_audit_{url_part}_{timestamp}.html'
+
+        return Response(
+            html_content,
+            mimetype='text/html',
+            headers={
+                'Content-Disposition': f'attachment; filename={filename}'
+            }
+        )
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def generate_standalone_html(results):
+    """
+    Generate standalone interactive HTML report
+
+    This creates a complete HTML file with:
+    - Embedded React, Babel, Tailwind CSS
+    - Full UI with tab navigation
+    - All data embedded as JSON
+    - Works offline without server
+    """
+
+    # Read the index.html template
+    try:
+        with open('index.html', 'r', encoding='utf-8') as f:
+            template = f.read()
+    except:
+        # Fallback if file not found
+        return generate_fallback_html(results)
+
+    # Extract CSS from template
+    css_start = template.find('<style>')
+    css_end = template.find('</style>') + 8
+    css_block = template[css_start:css_end] if css_start != -1 else ''
+
+    # Extract React app code
+    app_start = template.find('<script type="text/babel">')
+    app_end = template.find('</script>', app_start) + 9
+    app_code = template[app_start:app_end] if app_start != -1 else ''
+
+    # Clean up app code - remove initial data fetching, use embedded data
+    app_code_modified = app_code.replace(
+        'const [auditResults, setAuditResults] = useState(null);',
+        'const [auditResults, setAuditResults] = useState(window.AUDIT_RESULTS);'
+    ).replace(
+        'const [loading, setLoading] = useState(false);',
+        'const [loading, setLoading] = useState(false); // Report mode - no loading'
+    )
+
+    # Escape results for embedding in JavaScript
+    results_json = json.dumps(results, ensure_ascii=False, indent=2)
+
+    # Get metadata
+    url = results.get('url', 'Unknown')
+    score = results.get('final_score', results.get('homepage', {}).get('final_score', 0))
+    audit_type = results.get('audit_type', 'single-page')
+    timestamp = results.get('timestamp', datetime.datetime.now().isoformat())
+
+    # Build complete HTML
+    html = f"""<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Audit Report - {url}</title>
+
+    <!-- React & Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    {css_block}
+
+    <style>
+        /* Report-specific styles */
+        .report-header {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }}
+
+        .report-meta {{
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }}
+
+        @media print {{
+            .no-print {{
+                display: none;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <!-- Report Header -->
+    <div class="report-header">
+        <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">
+            📊 SEO Audit Report
+        </h1>
+        <p style="font-size: 1.1rem; opacity: 0.95;">
+            {url}
+        </p>
+        <div class="report-meta">
+            <span>📈 Score: <strong>{score}/100</strong></span>
+            <span>🔍 Type: <strong>{audit_type}</strong></span>
+            <span>📅 Generated: <strong>{timestamp[:10]}</strong></span>
+            <span>🤖 Powered by <strong>SEO AIditor</strong></span>
+        </div>
+    </div>
+
+    <!-- React App Container -->
+    <div id="root"></div>
+
+    <!-- Embedded Audit Data -->
+    <script>
+        // Audit results embedded directly in HTML
+        window.AUDIT_RESULTS = {results_json};
+
+        // Report mode flag
+        window.IS_REPORT_MODE = true;
+    </script>
+
+    <!-- React Application Code -->
+    {app_code_modified}
+
+    <!-- Report Footer -->
+    <footer style="text-align: center; padding: 2rem; color: #6b7280; margin-top: 3rem; border-top: 1px solid #e5e7eb;">
+        <p>Generated by <strong>SEO AIditor</strong> - Professional SEO Audit Tool</p>
+        <p style="font-size: 0.875rem; margin-top: 0.5rem;">
+            This is a standalone HTML report. All functionality works offline.
+        </p>
+    </footer>
+</body>
+</html>"""
+
+    return html
+
+def generate_fallback_html(results):
+    """Fallback HTML if template not found"""
+    results_json = json.dumps(results, ensure_ascii=False, indent=2)
+
+    return f"""<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Audit Report</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }}
+        pre {{ background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }}
+    </style>
+</head>
+<body>
+    <h1>SEO Audit Report</h1>
+    <p><strong>URL:</strong> {results.get('url', 'N/A')}</p>
+    <p><strong>Score:</strong> {results.get('final_score', 0)}/100</p>
+    <h2>Full Results (JSON)</h2>
+    <pre>{results_json}</pre>
+</body>
+</html>"""
 
 if __name__ == '__main__':
     print("Starting SEO AIditor API Server...")
