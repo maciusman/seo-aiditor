@@ -725,14 +725,33 @@
                                     <button
                                         key={page.id}
                                         onClick={() => setSelectedPageId(page.id)}
-                                        className={`w-full text-left px-4 py-3 rounded-lg transition ${
+                                        className={`w-full text-left px-4 py-3 rounded-lg transition border-l-4 ${
                                             selectedPageId === page.id
-                                                ? 'bg-purple-100 text-purple-900 font-semibold border-l-4 border-purple-500'
-                                                : 'hover:bg-gray-100 border-l-4 border-transparent'
+                                                ? 'bg-purple-100 text-purple-900 font-semibold border-purple-500'
+                                                : 'border-transparent'
                                         }`}
+                                        style={selectedPageId !== page.id ? {
+                                            color: '#9ca3af'
+                                        } : {}}
+                                        onMouseEnter={(e) => {
+                                            if (selectedPageId !== page.id) {
+                                                e.currentTarget.style.background = '#2a2a2a';
+                                                e.currentTarget.style.color = '#e5e7eb';
+                                                const urlDiv = e.currentTarget.querySelector('.url-text');
+                                                if (urlDiv) urlDiv.style.color = '#9ca3af';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (selectedPageId !== page.id) {
+                                                e.currentTarget.style.background = 'transparent';
+                                                e.currentTarget.style.color = '#9ca3af';
+                                                const urlDiv = e.currentTarget.querySelector('.url-text');
+                                                if (urlDiv) urlDiv.style.color = '#6b7280';
+                                            }
+                                        }}
                                     >
                                         <div className="font-medium">{page.label}</div>
-                                        <div className="text-xs text-gray-500 mt-1 truncate">{formatUrl(page.url)}</div>
+                                        <div className="url-text text-xs mt-1 truncate" style={{color: '#6b7280'}}>{formatUrl(page.url)}</div>
                                     </button>
                                 ))}
                             </div>
@@ -798,18 +817,20 @@
                                     <p className="text-sm text-gray-600">Dotyczy: <strong>{template.pages_affected}</strong></p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                        template.seo_impact === 'HIGH' ? 'bg-red-100 text-red-800' :
-                                        template.seo_impact === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-green-100 text-green-800'
-                                    }`}>
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{
+                                        background: template.seo_impact === 'HIGH' ? '#991b1b' :
+                                                   template.seo_impact === 'MEDIUM' ? '#d97706' : '#166534',
+                                        color: template.seo_impact === 'HIGH' ? '#fca5a5' :
+                                               template.seo_impact === 'MEDIUM' ? '#fef3c7' : '#bbf7d0'
+                                    }}>
                                         {template.seo_impact} SEO
                                     </span>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                        template.fix_difficulty === 'EASY' ? 'bg-green-100 text-green-800' :
-                                        template.fix_difficulty === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-red-100 text-red-800'
-                                    }`}>
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{
+                                        background: template.fix_difficulty === 'EASY' ? '#166534' :
+                                                   template.fix_difficulty === 'MEDIUM' ? '#d97706' : '#991b1b',
+                                        color: template.fix_difficulty === 'EASY' ? '#bbf7d0' :
+                                               template.fix_difficulty === 'MEDIUM' ? '#fef3c7' : '#fca5a5'
+                                    }}>
                                         {template.fix_difficulty}
                                     </span>
                                 </div>
@@ -930,7 +951,7 @@
                                             <div className="flex items-center gap-2 mb-2">
                                                 <span className={getBadgeClass(issue.severity)}>{issue.severity?.toUpperCase()}</span>
                                                 <span className="text-xs text-gray-500">Impact: {issue.impact}/10</span>
-                                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{issue.pageLabel}</span>
+                                                <span className="text-xs px-2 py-1 rounded" style={{background: '#1e40af', color: '#bfdbfe'}}>{issue.pageLabel}</span>
                                             </div>
                                             <h4 className="font-bold text-gray-800">{issue.title}</h4>
                                         </div>
@@ -1002,12 +1023,14 @@
                                     <div key={idx} className="border-l-4 border-purple-500 bg-purple-50 rounded-r p-4">
                                         <div className="flex items-start justify-between mb-3">
                                             <h4 className="font-bold flex-1">{rec.recommendation}</h4>
-                                            <span className={`px-3 py-1 rounded text-xs font-semibold ml-2 ${
-                                                rec.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                                                rec.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-                                                rec.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-green-100 text-green-800'
-                                            }`}>
+                                            <span className="px-3 py-1 rounded text-xs font-semibold ml-2" style={{
+                                                background: rec.priority === 'CRITICAL' ? '#991b1b' :
+                                                           rec.priority === 'HIGH' ? '#c2410c' :
+                                                           rec.priority === 'MEDIUM' ? '#d97706' : '#166534',
+                                                color: rec.priority === 'CRITICAL' ? '#fca5a5' :
+                                                       rec.priority === 'HIGH' ? '#fed7aa' :
+                                                       rec.priority === 'MEDIUM' ? '#fef3c7' : '#bbf7d0'
+                                            }}>
                                                 {rec.priority}
                                             </span>
                                         </div>
