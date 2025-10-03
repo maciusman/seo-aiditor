@@ -609,9 +609,9 @@
             return (
                 <div className="space-y-6">
                     {/* Executive Summary */}
-                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200">
+                    <div className="bg-white rounded-lg p-6 border border-purple-200">
                         <h3 className="text-xl font-bold text-purple-900 mb-3">📝 Podsumowanie wykonawcze</h3>
-                        <p className="text-gray-800 leading-relaxed">
+                        <p className="text-gray-700 leading-relaxed">
                             {siteWide.executive_summary || 'Multi-page analysis wykonana pomyślnie. Przeanalizowano ' + results.pages_analyzed + ' stron witryny ' + results.site_type + '.'}
                         </p>
                     </div>
@@ -782,8 +782,8 @@
 
             return (
                 <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg p-6">
-                        <h3 className="text-xl font-bold mb-2">🎨 Analiza szablonów</h3>
+                    <div className="bg-white rounded-lg p-6 border border-purple-200">
+                        <h3 className="text-xl font-bold mb-2 text-purple-900">🎨 Analiza szablonów</h3>
                         <p className="text-gray-700">
                             Problemy wykryte na poziomie szablonów wpływają na wiele stron jednocześnie.
                             <strong> Naprawienie jednego szablonu = naprawienie dziesiątek stron!</strong>
@@ -893,7 +893,7 @@
                     {/* Filters */}
                     <div className="flex flex-col md:flex-row gap-3 mb-6 pb-6 border-b">
                         <div className="flex-1">
-                            <label className="text-sm text-gray-600 block mb-1">Sortuj według:</label>
+                            <label className="text-sm block mb-1" style={{color: '#1f2937'}}>Sortuj według:</label>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
@@ -904,7 +904,7 @@
                             </select>
                         </div>
                         <div className="flex-1">
-                            <label className="text-sm text-gray-600 block mb-1">Filtruj według wagi:</label>
+                            <label className="text-sm block mb-1" style={{color: '#1f2937'}}>Filtruj według wagi:</label>
                             <select
                                 value={filterSeverity}
                                 onChange={(e) => setFilterSeverity(e.target.value)}
