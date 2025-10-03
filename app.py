@@ -35,11 +35,19 @@ def get_config():
             'environment': 'local' | 'production'
         }
     """
-    import config
-    return jsonify({
-        'require_user_keys': config.REQUIRE_USER_API_KEYS,
-        'environment': config.ENV
-    })
+    try:
+        import config
+        return jsonify({
+            'require_user_keys': config.REQUIRE_USER_API_KEYS,
+            'environment': config.ENV
+        })
+    except Exception as e:
+        # Fallback: If config fails to load, assume production mode
+        return jsonify({
+            'require_user_keys': True,
+            'environment': 'production',
+            'error': str(e)
+        })
 
 @app.route('/api/audit', methods=['POST'])
 def audit():
