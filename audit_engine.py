@@ -212,17 +212,8 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
     results['categories']['content'] = analyze_content(html_content)
 
     # PageSpeed (może zająć chwilę)
-    print("  - PageSpeed analysis (Google API)...")
-    try:
-        results['categories']['pagespeed'] = analyze_pagespeed(url)
-        # Merge PageSpeed score do technical
-        if 'core_web_vitals' in results['categories']['pagespeed'].get('mobile', {}):
-            results['categories']['technical']['core_web_vitals'] = results['categories']['pagespeed']['mobile']['core_web_vitals']
-    except Exception as e:
-        print(f"    Warning: PageSpeed failed: {e}")
-        results['categories']['pagespeed'] = {'score': 0, 'error': str(e)}
-
-    # PageSpeed Full (desktop + mobile + all categories) - dla nowej zakładki Performance
+    # PageSpeed Full (desktop + mobile + all categories) - dla zakładki Performance
+    # Note: Removed old pagespeed category - now using pagespeed_full with dedicated Performance tab
     print("  - PageSpeed Full analysis (mobile + desktop + all Lighthouse categories)...")
     try:
         results['pagespeed_full'] = analyze_pagespeed_full(url)
