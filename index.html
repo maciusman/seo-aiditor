@@ -273,6 +273,13 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // Helper function: Auto-detect API URL based on environment
+        function getApiUrl(endpoint) {
+            const isLocal = window.location.hostname === 'localhost' ||
+                            window.location.hostname === '127.0.0.1';
+            return isLocal ? `http://localhost:5000${endpoint}` : endpoint;
+        }
+
         // API Keys Modal Component
         function ApiKeysModal({ show, onClose, onSave, initialKeys }) {
             const [keys, setKeys] = useState(initialKeys || { gemini: '', psi: '' });
@@ -614,7 +621,7 @@
                         }
                     }, 4000);
 
-                    const API_URL = 'http://localhost:5000/api/audit';
+                    const API_URL = getApiUrl('/api/audit');
 
                     // Build request body
                     const requestBody = { url: url };
@@ -680,7 +687,7 @@
                 if (!auditResults) return;
 
                 try {
-                    const response = await fetch('http://localhost:5000/api/export/html', {
+                    const response = await fetch(getApiUrl('/api/export/html'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
