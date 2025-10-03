@@ -13,23 +13,44 @@
 
         body {
             font-family: 'Inter', sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
         }
 
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        /* Logo */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-img {
+            height: 50px;
+            width: auto;
+        }
+
+        @media (max-width: 640px) {
+            .logo-img {
+                height: 40px;
+            }
         }
 
         /* Tab Navigation */
         .tab-nav {
             display: flex;
-            border-bottom: 2px solid #e5e7eb;
+            border-bottom: 2px solid #2a2a2a;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            background: white;
+            background: #1a1a1a;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .tab-nav::-webkit-scrollbar {
@@ -37,14 +58,14 @@
         }
 
         .tab-nav::-webkit-scrollbar-thumb {
-            background: #9ca3af;
+            background: #4b5563;
             border-radius: 2px;
         }
 
         .tab-button {
             padding: 1rem 1.5rem;
             font-weight: 500;
-            color: #6b7280;
+            color: #9ca3af;
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
             white-space: nowrap;
@@ -59,14 +80,14 @@
         }
 
         .tab-button:hover {
-            color: #4f46e5;
-            background: #f9fafb;
+            color: #f97316;
+            background: #242424;
         }
 
         .tab-button.active {
-            color: #4f46e5;
-            border-bottom-color: #4f46e5;
-            background: #f9fafb;
+            color: #f97316;
+            border-bottom-color: #f97316;
+            background: #242424;
         }
 
         .tab-badge {
@@ -77,8 +98,8 @@
             font-size: 0.75rem;
             font-weight: 600;
             border-radius: 9999px;
-            background: #e0e7ff;
-            color: #4f46e5;
+            background: #374151;
+            color: #f97316;
         }
 
         /* Mobile responsive */
@@ -86,7 +107,9 @@
             display: block;
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #d1d5db;
+            border: 1px solid #374151;
+            background: #1a1a1a;
+            color: #e0e0e0;
             border-radius: 0.5rem;
             margin-bottom: 1rem;
         }
@@ -129,8 +152,8 @@
 
         /* Badges */
         .badge-critical {
-            background-color: #FEE2E2;
-            color: #991B1B;
+            background-color: #991b1b;
+            color: #fca5a5;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -138,8 +161,8 @@
         }
 
         .badge-important {
-            background-color: #FEF3C7;
-            color: #92400E;
+            background-color: #c2410c;
+            color: #fed7aa;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -147,8 +170,8 @@
         }
 
         .badge-recommendation {
-            background-color: #DBEAFE;
-            color: #1E40AF;
+            background-color: #0c4a6e;
+            color: #7dd3fc;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -173,7 +196,7 @@
         }
 
         .collapsible-header:hover {
-            background-color: #f9fafb;
+            background-color: #242424;
         }
 
         /* Timeline */
@@ -190,7 +213,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: #e5e7eb;
+            background: #374151;
         }
 
         .timeline-item:last-child::before {
@@ -204,12 +227,47 @@
             width: 1.25rem;
             height: 1.25rem;
             border-radius: 50%;
-            border: 3px solid white;
+            border: 3px solid #1a1a1a;
             box-shadow: 0 0 0 2px currentColor;
         }
+
+        /* Override Tailwind for dark theme */
+        .bg-white { background: #1a1a1a !important; }
+        .text-gray-700 { color: #d1d5db !important; }
+        .text-gray-600 { color: #9ca3af !important; }
+        .text-gray-500 { color: #6b7280 !important; }
+        .text-gray-800 { color: #e5e7eb !important; }
+        .text-gray-900 { color: #f3f4f6 !important; }
+        .border-gray-300 { border-color: #374151 !important; }
+        .border-gray-200 { border-color: #2a2a2a !important; }
+        .bg-gray-50 { background: #242424 !important; }
+        .bg-gray-100 { background: #2a2a2a !important; }
+        .bg-blue-50 { background: #1e3a5f !important; }
+        .bg-blue-100 { background: #1e40af !important; }
+        .bg-green-50 { background: #14532d !important; }
+        .bg-green-100 { background: #166534 !important; }
+        .bg-red-50 { background: #7f1d1d !important; }
+        .bg-red-100 { background: #991b1b !important; }
+        .bg-purple-50 { background: rgba(168, 85, 247, 0.15) !important; }
+        .bg-purple-100 { background: rgba(168, 85, 247, 0.2) !important; }
+        .bg-orange-50 { background: rgba(249, 115, 22, 0.15) !important; }
+        .bg-yellow-50 { background: rgba(245, 158, 11, 0.15) !important; }
+        .bg-pink-100 { background: rgba(236, 72, 153, 0.2) !important; }
+        .bg-indigo-50 { background: rgba(99, 102, 241, 0.15) !important; }
+        .border-purple-200 { border-color: #6b21a8 !important; }
+        .border-blue-200 { border-color: #1e40af !important; }
+        .border-green-200 { border-color: #166534 !important; }
+        .border-red-200 { border-color: #991b1b !important; }
+        .border-orange-200 { border-color: #9a3412 !important; }
+        .text-purple-900 { color: #c084fc !important; }
+        .text-red-900 { color: #fca5a5 !important; }
+        .text-orange-900 { color: #fed7aa !important; }
+        .text-blue-900 { color: #93c5fd !important; }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body style="background: #0f0f0f;">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -347,10 +405,15 @@
             return (
                 <div className="min-h-screen">
                     {/* Header */}
-                    <header className="gradient-bg text-white py-6 px-4 shadow-lg">
+                    <header className="gradient-bg text-white py-4 px-4 shadow-lg">
                         <div className="max-w-7xl mx-auto">
-                            <h1 className="text-2xl md:text-3xl font-bold">SEO AIditor</h1>
-                            <p className="text-blue-100 text-sm">Multi-Page Intelligence × AI-Powered Insights</p>
+                            <div className="logo-container">
+                                <img src="/static/logo.png" alt="SEO AIditor" className="logo-img" />
+                                <div>
+                                    <h1 className="text-xl md:text-2xl font-bold" style={{color: '#f3f4f6'}}>SEO AIditor</h1>
+                                    <p className="text-xs md:text-sm" style={{color: '#9ca3af'}}>Multi-Page Intelligence × AI-Powered Insights</p>
+                                </div>
+                            </div>
                         </div>
                     </header>
 
@@ -366,14 +429,20 @@
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
                                     placeholder="https://example.com"
-                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg"
+                                    style={{background: '#1a1a1a', color: '#e0e0e0', borderColor: '#374151'}}
                                     disabled={loading}
                                     onKeyPress={(e) => e.key === 'Enter' && runAudit()}
+                                    onFocus={(e) => e.target.style.outline = '2px solid #f97316'}
+                                    onBlur={(e) => e.target.style.outline = 'none'}
                                 />
                                 <button
                                     onClick={runAudit}
                                     disabled={loading}
-                                    className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md"
+                                    className="px-8 py-3 text-white rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md"
+                                    style={{background: loading ? '#6b7280' : '#f97316'}}
+                                    onMouseEnter={(e) => !loading && (e.target.style.background = '#ea580c')}
+                                    onMouseLeave={(e) => !loading && (e.target.style.background = '#f97316')}
                                 >
                                     {loading ? 'Analizuję...' : 'Uruchom audyt'}
                                 </button>
@@ -421,8 +490,10 @@
                     </div>
 
                     {/* Footer */}
-                    <footer className="mt-12 py-6 text-center text-gray-500 text-sm border-t">
-                        <p>SEO AIditor &copy; 2025 | Powered by Gemini 2.5 Flash AI</p>
+                    <footer className="mt-12 py-6 text-center text-sm" style={{borderTop: '1px solid #2a2a2a'}}>
+                        <p style={{color: '#9ca3af'}}>
+                            Generated by <strong style={{color: '#f97316'}}>SEO AIditor</strong> &copy; 2025 | Powered by Gemini 2.5 Flash AI
+                        </p>
                     </footer>
                 </div>
             );
@@ -604,13 +675,19 @@
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <h3 className="text-lg font-bold mb-4">📥 Eksport wyników</h3>
                         <div className="flex flex-wrap gap-3">
-                            <button onClick={exportHTML} className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-md">
+                            <button onClick={exportHTML} className="px-6 py-3 text-white rounded-lg transition shadow-md" style={{background: '#f97316'}}
+                                onMouseEnter={(e) => e.target.style.background = '#ea580c'}
+                                onMouseLeave={(e) => e.target.style.background = '#f97316'}>
                                 🌐 Eksport HTML (Interaktywny)
                             </button>
-                            <button onClick={exportJSON} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md">
+                            <button onClick={exportJSON} className="px-6 py-3 text-white rounded-lg transition shadow-md" style={{background: '#1e40af'}}
+                                onMouseEnter={(e) => e.target.style.background = '#1e3a8a'}
+                                onMouseLeave={(e) => e.target.style.background = '#1e40af'}>
                                 📄 Eksport JSON
                             </button>
-                            <button onClick={exportCSV} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-md">
+                            <button onClick={exportCSV} className="px-6 py-3 text-white rounded-lg transition shadow-md" style={{background: '#166534'}}
+                                onMouseEnter={(e) => e.target.style.background = '#14532d'}
+                                onMouseLeave={(e) => e.target.style.background = '#166534'}>
                                 📊 Eksport CSV
                             </button>
                         </div>
@@ -1042,13 +1119,19 @@
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <h3 className="text-lg font-bold mb-4">📥 Eksport wyników</h3>
                         <div className="flex flex-wrap gap-3">
-                            <button onClick={exportHTML} className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                            <button onClick={exportHTML} className="px-6 py-3 text-white rounded-lg transition" style={{background: '#f97316'}}
+                                onMouseEnter={(e) => e.target.style.background = '#ea580c'}
+                                onMouseLeave={(e) => e.target.style.background = '#f97316'}>
                                 🌐 HTML (Interaktywny)
                             </button>
-                            <button onClick={exportJSON} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <button onClick={exportJSON} className="px-6 py-3 text-white rounded-lg transition" style={{background: '#1e40af'}}
+                                onMouseEnter={(e) => e.target.style.background = '#1e3a8a'}
+                                onMouseLeave={(e) => e.target.style.background = '#1e40af'}>
                                 📄 JSON
                             </button>
-                            <button onClick={exportCSV} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                            <button onClick={exportCSV} className="px-6 py-3 text-white rounded-lg transition" style={{background: '#166534'}}
+                                onMouseEnter={(e) => e.target.style.background = '#14532d'}
+                                onMouseLeave={(e) => e.target.style.background = '#166534'}>
                                 📊 CSV
                             </button>
                         </div>
