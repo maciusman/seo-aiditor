@@ -7,13 +7,8 @@ from urllib.parse import urlparse
 from audit_engine import run_audit
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)  # Enable CORS for frontend communication
-
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    """Serve static files (logo, etc.)"""
-    return send_from_directory('static', filename)
 
 @app.route('/')
 def home():
