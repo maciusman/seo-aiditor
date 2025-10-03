@@ -10,6 +10,11 @@ import os
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)  # Enable CORS for frontend communication
 
+@app.route('/logo.png')
+def serve_logo():
+    """Serve logo from root directory"""
+    return send_from_directory('.', 'logo.png')
+
 @app.route('/')
 def home():
     return jsonify({
