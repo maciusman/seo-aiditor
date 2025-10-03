@@ -17,14 +17,8 @@ def serve_logo():
 
 @app.route('/')
 def home():
-    return jsonify({
-        'message': 'SEO AIditor API',
-        'version': '1.0.0',
-        'endpoints': {
-            '/api/audit': 'POST - Run SEO audit',
-            '/api/health': 'GET - Health check'
-        }
-    })
+    """Serve the main frontend application"""
+    return send_from_directory('.', 'index.html')
 
 @app.route('/api/health', methods=['GET'])
 def health():
