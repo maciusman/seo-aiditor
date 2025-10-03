@@ -281,270 +281,6 @@
         }
 
         // API Keys Modal Component
-        function ApiKeysModal({ show, onClose, onSave, initialKeys }) {
-            const [keys, setKeys] = useState(initialKeys || { gemini: '', psi: '' });
-            const [remember, setRemember] = useState(false);
-            const [showKeys, setShowKeys] = useState({ gemini: false, psi: false });
-
-            if (!show) return null;
-
-            const handleSave = () => {
-                if (!keys.gemini || keys.gemini.trim() === '') {
-                    alert('Gemini API key is required!');
-                    return;
-                }
-
-                // Save keys based on remember preference
-                if (remember) {
-                    localStorage.setItem('gemini_key', keys.gemini);
-                    localStorage.setItem('psi_key', keys.psi);
-                    localStorage.setItem('remember_keys', 'true');
-                } else {
-                    sessionStorage.setItem('gemini_key', keys.gemini);
-                    sessionStorage.setItem('psi_key', keys.psi);
-                    // Clear from localStorage if exists
-                    localStorage.removeItem('gemini_key');
-                    localStorage.removeItem('psi_key');
-                    localStorage.removeItem('remember_keys');
-                }
-
-                onSave(keys);
-                onClose();
-            };
-
-            return (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.8)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 9999,
-                    padding: '20px'
-                }}>
-                    <div style={{
-                        background: '#1a1a1a',
-                        borderRadius: '12px',
-                        padding: '32px',
-                        maxWidth: '600px',
-                        width: '100%',
-                        maxHeight: '90vh',
-                        overflow: 'auto',
-                        border: '1px solid #333'
-                    }}>
-                        <h2 style={{ color: '#f97316', marginBottom: '16px', fontSize: '24px' }}>
-                            🔑 API Keys Required
-                        </h2>
-
-                        <p style={{ color: '#9ca3af', marginBottom: '24px', lineHeight: '1.6' }}>
-                            SEO AIditor is free, but requires your own Google API keys to function.
-                            Keys are stored only in your browser and used only during analysis.
-                        </p>
-
-                        <div style={{ marginBottom: '24px', padding: '16px', background: '#2a2a2a', borderRadius: '8px', border: '1px solid #3a3a3a' }}>
-                            <p style={{ color: '#fbbf24', fontSize: '14px', marginBottom: '8px' }}>
-                                📚 <strong>New to API keys?</strong>
-                            </p>
-                            <a
-                                href="https://github.com/maciusman/seo-aiditor/blob/master/GETTING_API_KEYS.md"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: '#60a5fa', textDecoration: 'underline', fontSize: '14px' }}
-                            >
-                                Read the 2-minute guide →
-                            </a>
-                        </div>
-
-                        {/* Gemini API Key (Required) */}
-                        <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', color: '#e5e7eb', marginBottom: '8px', fontWeight: '600' }}>
-                                Google Gemini API Key <span style={{ color: '#f87171' }}>*</span>
-                            </label>
-                            <div style={{ position: 'relative' }}>
-                                <input
-                                    type={showKeys.gemini ? 'text' : 'password'}
-                                    value={keys.gemini}
-                                    onChange={(e) => setKeys({ ...keys, gemini: e.target.value })}
-                                    placeholder="AIza..."
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        paddingRight: '40px',
-                                        background: '#0f0f0f',
-                                        border: '1px solid #3a3a3a',
-                                        borderRadius: '6px',
-                                        color: '#e5e7eb',
-                                        fontSize: '14px',
-                                        fontFamily: 'monospace'
-                                    }}
-                                />
-                                <button
-                                    onClick={() => setShowKeys({ ...showKeys, gemini: !showKeys.gemini })}
-                                    style={{
-                                        position: 'absolute',
-                                        right: '8px',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: '#9ca3af',
-                                        cursor: 'pointer',
-                                        fontSize: '18px'
-                                    }}
-                                >
-                                    {showKeys.gemini ? '🙈' : '👁️'}
-                                </button>
-                            </div>
-                            <a
-                                href="https://aistudio.google.com/apikey"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    display: 'inline-block',
-                                    marginTop: '8px',
-                                    color: '#60a5fa',
-                                    fontSize: '13px',
-                                    textDecoration: 'none'
-                                }}
-                            >
-                                → Get free Gemini key (5 req/min, 25/day)
-                            </a>
-                        </div>
-
-                        {/* PageSpeed API Key (Optional) */}
-                        <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', color: '#e5e7eb', marginBottom: '8px', fontWeight: '600' }}>
-                                PageSpeed Insights API Key <span style={{ color: '#9ca3af', fontSize: '13px' }}>(optional)</span>
-                            </label>
-                            <div style={{ position: 'relative' }}>
-                                <input
-                                    type={showKeys.psi ? 'text' : 'password'}
-                                    value={keys.psi}
-                                    onChange={(e) => setKeys({ ...keys, psi: e.target.value })}
-                                    placeholder="Optional - for detailed Performance tab"
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        paddingRight: '40px',
-                                        background: '#0f0f0f',
-                                        border: '1px solid #3a3a3a',
-                                        borderRadius: '6px',
-                                        color: '#e5e7eb',
-                                        fontSize: '14px',
-                                        fontFamily: 'monospace'
-                                    }}
-                                />
-                                <button
-                                    onClick={() => setShowKeys({ ...showKeys, psi: !showKeys.psi })}
-                                    style={{
-                                        position: 'absolute',
-                                        right: '8px',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: '#9ca3af',
-                                        cursor: 'pointer',
-                                        fontSize: '18px'
-                                    }}
-                                >
-                                    {showKeys.psi ? '🙈' : '👁️'}
-                                </button>
-                            </div>
-                            <a
-                                href="https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    display: 'inline-block',
-                                    marginTop: '8px',
-                                    color: '#60a5fa',
-                                    fontSize: '13px',
-                                    textDecoration: 'none'
-                                }}
-                            >
-                                → Get free PSI key (25K req/day)
-                            </a>
-                            <p style={{ color: '#9ca3af', fontSize: '12px', marginTop: '8px' }}>
-                                ⚠️ Without PSI key: Basic performance metrics only (no detailed Lighthouse data)
-                            </p>
-                        </div>
-
-                        {/* Remember checkbox */}
-                        <div style={{ marginBottom: '24px', padding: '16px', background: '#2a2a2a', borderRadius: '8px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: '#e5e7eb' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={remember}
-                                    onChange={(e) => setRemember(e.target.checked)}
-                                    style={{ marginRight: '12px', width: '18px', height: '18px', cursor: 'pointer' }}
-                                />
-                                <span>Remember keys in this browser</span>
-                            </label>
-                            <p style={{ color: '#9ca3af', fontSize: '12px', marginTop: '8px', marginLeft: '30px' }}>
-                                {remember ?
-                                    '⚠️ Only use on trusted, personal devices. Keys will persist in localStorage.' :
-                                    '🔒 Keys will be deleted when you close this tab (sessionStorage).'
-                                }
-                            </p>
-                        </div>
-
-                        {/* Info box */}
-                        <div style={{
-                            marginBottom: '24px',
-                            padding: '12px',
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            border: '1px solid rgba(59, 130, 246, 0.3)',
-                            borderRadius: '6px'
-                        }}>
-                            <p style={{ color: '#93c5fd', fontSize: '13px', lineHeight: '1.5' }}>
-                                ℹ️ <strong>Privacy:</strong> Keys are stored in YOUR browser only, sent to server only during analysis, and never logged or saved server-side.
-                            </p>
-                        </div>
-
-                        {/* Buttons */}
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                            <button
-                                onClick={onClose}
-                                style={{
-                                    padding: '12px 24px',
-                                    background: 'transparent',
-                                    border: '1px solid #3a3a3a',
-                                    borderRadius: '6px',
-                                    color: '#9ca3af',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    fontWeight: '600'
-                                }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                disabled={!keys.gemini || keys.gemini.trim() === ''}
-                                style={{
-                                    padding: '12px 24px',
-                                    background: keys.gemini ? '#f97316' : '#3a3a3a',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    color: keys.gemini ? '#fff' : '#6b7280',
-                                    cursor: keys.gemini ? 'pointer' : 'not-allowed',
-                                    fontSize: '14px',
-                                    fontWeight: '600'
-                                }}
-                            >
-                                Save & Continue
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
         function App() {
             const [url, setUrl] = useState('');
             const [loading, setLoading] = useState(false);
@@ -554,32 +290,24 @@
             const [error, setError] = useState(null);
 
             // API Keys state (production mode)
-            const [requireUserKeys, setRequireUserKeys] = useState(false);
-            const [showApiKeysModal, setShowApiKeysModal] = useState(false);
+            // Detect if we're in production (not localhost)
+            const isProduction = window.location.hostname !== 'localhost' &&
+                                window.location.hostname !== '127.0.0.1';
+
+            const [showApiKeysPanel, setShowApiKeysPanel] = useState(false);
             const [apiKeys, setApiKeys] = useState({
                 gemini: localStorage.getItem('gemini_key') || sessionStorage.getItem('gemini_key') || '',
                 psi: localStorage.getItem('psi_key') || sessionStorage.getItem('psi_key') || ''
             });
+            const [tempKeys, setTempKeys] = useState({ gemini: '', psi: '' });
+            const [rememberKeys, setRememberKeys] = useState(localStorage.getItem('remember_keys') === 'true');
+            const [showKeysInput, setShowKeysInput] = useState({ gemini: false, psi: false });
 
-            // Check environment on component mount
+            // Auto-expand panel if in production and no keys saved
             useEffect(() => {
-                fetch('/api/config')
-                    .then(r => r.json())
-                    .then(config => {
-                        setRequireUserKeys(config.require_user_keys);
-
-                        // Auto-show modal on first visit in production if no keys
-                        if (config.require_user_keys && !apiKeys.gemini) {
-                            // Small delay to let user see the UI first
-                            setTimeout(() => {
-                                setShowApiKeysModal(true);
-                            }, 500);
-                        }
-                    })
-                    .catch(err => {
-                        console.log('Using local mode (config endpoint not available)');
-                        setRequireUserKeys(false);
-                    });
+                if (isProduction && !apiKeys.gemini) {
+                    setShowApiKeysPanel(true);
+                }
             }, []);
 
             const runAudit = async () => {
@@ -589,8 +317,9 @@
                 }
 
                 // Check if API keys are required and available
-                if (requireUserKeys && !apiKeys.gemini) {
-                    setShowApiKeysModal(true);
+                if (isProduction && !apiKeys.gemini) {
+                    setShowApiKeysPanel(true);
+                    alert('Please configure your Google Gemini API key first');
                     return;
                 }
 
@@ -628,7 +357,7 @@
 
                     // Build request body
                     const requestBody = { url: url };
-                    if (requireUserKeys) {
+                    if (isProduction) {
                         requestBody.gemini_key = apiKeys.gemini;
                         requestBody.psi_key = apiKeys.psi;
                     }
@@ -717,22 +446,8 @@
                 }
             };
 
-            const handleApiKeysSave = (keys) => {
-                setApiKeys(keys);
-                // Keys are already saved to storage in the modal component
-                // Just update state and allow audit to proceed
-            };
-
             return (
                 <div className="min-h-screen">
-                    {/* API Keys Modal */}
-                    <ApiKeysModal
-                        show={showApiKeysModal}
-                        onClose={() => setShowApiKeysModal(false)}
-                        onSave={handleApiKeysSave}
-                        initialKeys={apiKeys}
-                    />
-
                     {/* Header */}
                     <header className="gradient-bg text-white py-4 px-4 shadow-lg">
                         <div className="max-w-7xl mx-auto">
@@ -746,47 +461,185 @@
                         </div>
                     </header>
 
-                    {/* API Keys Warning Banner */}
-                    {requireUserKeys && !apiKeys.gemini && (
+                    {/* API Keys Configuration Panel (Production Only) */}
+                    {isProduction && (
                         <div className="max-w-7xl mx-auto px-4 py-4">
                             <div style={{
-                                background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                                border: '2px solid #f59e0b',
+                                background: apiKeys.gemini ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' : 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                                border: apiKeys.gemini ? '2px solid #10b981' : '2px solid #f59e0b',
                                 borderRadius: '12px',
                                 padding: '20px',
-                                boxShadow: '0 4px 6px rgba(245, 158, 11, 0.2)'
+                                boxShadow: apiKeys.gemini ? '0 4px 6px rgba(16, 185, 129, 0.2)' : '0 4px 6px rgba(245, 158, 11, 0.2)'
                             }}>
-                                <div style={{display: 'flex', alignItems: 'start', gap: '16px'}}>
-                                    <div style={{fontSize: '32px', flexShrink: 0}}>🔑</div>
-                                    <div style={{flex: 1}}>
-                                        <h3 style={{color: '#92400e', fontWeight: '700', fontSize: '18px', marginBottom: '8px'}}>
-                                            API Keys Required
-                                        </h3>
-                                        <p style={{color: '#78350f', fontSize: '14px', lineHeight: '1.6', marginBottom: '12px'}}>
-                                            SEO AIditor requires your own Google API keys to function.
-                                            Keys are <strong>completely free</strong> and take only 2 minutes to obtain.
-                                        </p>
+                                <div style={{display: 'flex', alignItems: 'start', justifyContent: 'space-between', gap: '16px'}}>
+                                    <div style={{display: 'flex', alignItems: 'start', gap: '16px', flex: 1}}>
+                                        <div style={{fontSize: '32px', flexShrink: 0}}>🔑</div>
+                                        <div style={{flex: 1}}>
+                                            <h3 style={{color: apiKeys.gemini ? '#065f46' : '#92400e', fontWeight: '700', fontSize: '18px', marginBottom: '8px'}}>
+                                                {apiKeys.gemini ? 'API Keys Configured ✓' : 'API Keys Required'}
+                                            </h3>
+                                            {!apiKeys.gemini && (
+                                                <p style={{color: '#78350f', fontSize: '14px', lineHeight: '1.6', marginBottom: '12px'}}>
+                                                    SEO AIditor requires your own Google API keys. Keys are <strong>free</strong> and take 2 minutes to get.
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowApiKeysPanel(!showApiKeysPanel)}
+                                        style={{
+                                            background: apiKeys.gemini ? '#10b981' : '#f59e0b',
+                                            color: '#fff',
+                                            padding: '8px 16px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            fontWeight: '600',
+                                            fontSize: '14px',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                            transition: 'all 0.2s',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {showApiKeysPanel ? '▲ Hide' : (apiKeys.gemini ? '▼ Edit Keys' : '▼ Configure')}
+                                    </button>
+                                </div>
+
+                                {/* Expandable Form */}
+                                {showApiKeysPanel && (
+                                    <div style={{marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(0,0,0,0.1)'}}>
+                                        {/* Gemini API Key */}
+                                        <div style={{marginBottom: '16px'}}>
+                                            <label style={{display: 'block', color: '#374151', fontWeight: '600', fontSize: '14px', marginBottom: '6px'}}>
+                                                🤖 Google Gemini API Key <span style={{color: '#ef4444'}}>*</span>
+                                            </label>
+                                            <div style={{display: 'flex', gap: '8px'}}>
+                                                <input
+                                                    type={showKeysInput.gemini ? 'text' : 'password'}
+                                                    value={tempKeys.gemini || apiKeys.gemini}
+                                                    onChange={(e) => setTempKeys({...tempKeys, gemini: e.target.value})}
+                                                    placeholder="AIzaSy..."
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: '10px 12px',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '6px',
+                                                        fontSize: '14px',
+                                                        background: '#fff'
+                                                    }}
+                                                />
+                                                <button
+                                                    onClick={() => setShowKeysInput({...showKeysInput, gemini: !showKeysInput.gemini})}
+                                                    style={{
+                                                        padding: '10px 16px',
+                                                        background: '#f3f4f6',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '16px'
+                                                    }}
+                                                >
+                                                    {showKeysInput.gemini ? '🙈' : '👁️'}
+                                                </button>
+                                            </div>
+                                            <a href="https://aistudio.google.com/apikey" target="_blank" style={{color: '#3b82f6', fontSize: '12px', marginTop: '4px', display: 'inline-block'}}>
+                                                → Get free key (2 min)
+                                            </a>
+                                        </div>
+
+                                        {/* PSI API Key (Optional) */}
+                                        <div style={{marginBottom: '16px'}}>
+                                            <label style={{display: 'block', color: '#374151', fontWeight: '600', fontSize: '14px', marginBottom: '6px'}}>
+                                                ⚡ PageSpeed Insights API Key <span style={{color: '#9ca3af', fontWeight: 'normal'}}>(optional)</span>
+                                            </label>
+                                            <div style={{display: 'flex', gap: '8px'}}>
+                                                <input
+                                                    type={showKeysInput.psi ? 'text' : 'password'}
+                                                    value={tempKeys.psi || apiKeys.psi}
+                                                    onChange={(e) => setTempKeys({...tempKeys, psi: e.target.value})}
+                                                    placeholder="AIzaSy... (optional)"
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: '10px 12px',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '6px',
+                                                        fontSize: '14px',
+                                                        background: '#fff'
+                                                    }}
+                                                />
+                                                <button
+                                                    onClick={() => setShowKeysInput({...showKeysInput, psi: !showKeysInput.psi})}
+                                                    style={{
+                                                        padding: '10px 16px',
+                                                        background: '#f3f4f6',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '16px'
+                                                    }}
+                                                >
+                                                    {showKeysInput.psi ? '🙈' : '👁️'}
+                                                </button>
+                                            </div>
+                                            <a href="https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com" target="_blank" style={{color: '#3b82f6', fontSize: '12px', marginTop: '4px', display: 'inline-block'}}>
+                                                → Get free key (optional)
+                                            </a>
+                                        </div>
+
+                                        {/* Remember checkbox */}
+                                        <label style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer'}}>
+                                            <input
+                                                type="checkbox"
+                                                checked={rememberKeys}
+                                                onChange={(e) => setRememberKeys(e.target.checked)}
+                                                style={{width: '16px', height: '16px', cursor: 'pointer'}}
+                                            />
+                                            <span style={{fontSize: '14px', color: '#374151'}}>
+                                                Remember keys (saved in browser storage)
+                                            </span>
+                                        </label>
+
+                                        {/* Save button */}
                                         <button
-                                            onClick={() => setShowApiKeysModal(true)}
+                                            onClick={() => {
+                                                const newGemini = tempKeys.gemini || apiKeys.gemini;
+                                                const newPsi = tempKeys.psi || apiKeys.psi;
+
+                                                if (!newGemini || newGemini.trim() === '') {
+                                                    alert('Gemini API key is required!');
+                                                    return;
+                                                }
+
+                                                // Save keys
+                                                const storage = rememberKeys ? localStorage : sessionStorage;
+                                                storage.setItem('gemini_key', newGemini);
+                                                storage.setItem('psi_key', newPsi);
+                                                if (rememberKeys) {
+                                                    localStorage.setItem('remember_keys', 'true');
+                                                }
+
+                                                // Update state
+                                                setApiKeys({ gemini: newGemini, psi: newPsi });
+                                                setTempKeys({ gemini: '', psi: '' });
+                                                setShowApiKeysPanel(false);
+                                            }}
                                             style={{
-                                                background: '#f59e0b',
+                                                background: '#10b981',
                                                 color: '#fff',
-                                                padding: '10px 20px',
+                                                padding: '12px 24px',
                                                 borderRadius: '8px',
                                                 border: 'none',
                                                 cursor: 'pointer',
                                                 fontWeight: '600',
                                                 fontSize: '14px',
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                transition: 'all 0.2s'
+                                                width: '100%',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                                             }}
-                                            onMouseEnter={(e) => e.target.style.background = '#ea580c'}
-                                            onMouseLeave={(e) => e.target.style.background = '#f59e0b'}
                                         >
-                                            Configure API Keys →
+                                            💾 Save & Continue
                                         </button>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -822,17 +675,6 @@
                                 </button>
                             </div>
 
-                            {/* API Keys Hint */}
-                            {requireUserKeys && !apiKeys.gemini && (
-                                <p style={{
-                                    color: '#9ca3af',
-                                    fontSize: '13px',
-                                    marginTop: '12px',
-                                    textAlign: 'center'
-                                }}>
-                                    ⚠️ Configure API keys in the banner above before analyzing
-                                </p>
-                            )}
                         </div>
 
                         {/* Loading State */}
