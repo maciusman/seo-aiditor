@@ -567,10 +567,13 @@
                     .then(r => r.json())
                     .then(config => {
                         setRequireUserKeys(config.require_user_keys);
-                        // Show modal on first visit in production if no keys
+
+                        // Auto-show modal on first visit in production if no keys
                         if (config.require_user_keys && !apiKeys.gemini) {
-                            // Don't show immediately - let user see the UI first
-                            // They'll see it when they click "Analyze"
+                            // Small delay to let user see the UI first
+                            setTimeout(() => {
+                                setShowApiKeysModal(true);
+                            }, 500);
                         }
                     })
                     .catch(err => {
@@ -743,6 +746,51 @@
                         </div>
                     </header>
 
+                    {/* API Keys Warning Banner */}
+                    {requireUserKeys && !apiKeys.gemini && (
+                        <div className="max-w-7xl mx-auto px-4 py-4">
+                            <div style={{
+                                background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                                border: '2px solid #f59e0b',
+                                borderRadius: '12px',
+                                padding: '20px',
+                                boxShadow: '0 4px 6px rgba(245, 158, 11, 0.2)'
+                            }}>
+                                <div style={{display: 'flex', alignItems: 'start', gap: '16px'}}>
+                                    <div style={{fontSize: '32px', flexShrink: 0}}>🔑</div>
+                                    <div style={{flex: 1}}>
+                                        <h3 style={{color: '#92400e', fontWeight: '700', fontSize: '18px', marginBottom: '8px'}}>
+                                            API Keys Required
+                                        </h3>
+                                        <p style={{color: '#78350f', fontSize: '14px', lineHeight: '1.6', marginBottom: '12px'}}>
+                                            SEO AIditor requires your own Google API keys to function.
+                                            Keys are <strong>completely free</strong> and take only 2 minutes to obtain.
+                                        </p>
+                                        <button
+                                            onClick={() => setShowApiKeysModal(true)}
+                                            style={{
+                                                background: '#f59e0b',
+                                                color: '#fff',
+                                                padding: '10px 20px',
+                                                borderRadius: '8px',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                fontWeight: '600',
+                                                fontSize: '14px',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.background = '#ea580c'}
+                                            onMouseLeave={(e) => e.target.style.background = '#f59e0b'}
+                                        >
+                                            Configure API Keys →
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* URL Input */}
                     <div className="max-w-7xl mx-auto px-4 py-6">
                         <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
@@ -773,6 +821,18 @@
                                     {loading ? 'Analizuję...' : 'Uruchom audyt'}
                                 </button>
                             </div>
+
+                            {/* API Keys Hint */}
+                            {requireUserKeys && !apiKeys.gemini && (
+                                <p style={{
+                                    color: '#9ca3af',
+                                    fontSize: '13px',
+                                    marginTop: '12px',
+                                    textAlign: 'center'
+                                }}>
+                                    ⚠️ Configure API keys in the banner above before analyzing
+                                </p>
+                            )}
                         </div>
 
                         {/* Loading State */}
