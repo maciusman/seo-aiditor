@@ -527,11 +527,13 @@
                 { id: 'pages', label: 'Strony', icon: '📄', badge: results.pages_analyzed },
                 { id: 'templates', label: 'Szablony', icon: '🎨', badge: results.site_wide_analysis?.template_insights?.length || 0 },
                 { id: 'issues', label: 'Problemy', icon: '⚠️', badge: (results.homepage?.all_issues?.length || 0) + (results.site_wide_analysis?.cross_page_issues?.length || 0) },
+                { id: 'performance', label: 'Performance', icon: '⚡', badge: null },
                 { id: 'strategy', label: 'Strategia', icon: '🎯', badge: null }
             ] : [
                 { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
                 { id: 'categories', label: 'Kategorie', icon: '📋', badge: Object.keys(results.categories || {}).length },
                 { id: 'issues', label: 'Problemy', icon: '⚠️', badge: results.all_issues?.length || 0 },
+                { id: 'performance', label: 'Performance', icon: '⚡', badge: null },
                 { id: 'quickwins', label: 'Quick Wins', icon: '⚡', badge: results.quick_wins?.length || 0 }
             ];
 
@@ -562,6 +564,7 @@
                                 {activeTab === 'pages' && <PagesTabMulti results={results} allPages={allPages} selectedPageId={selectedPageId} setSelectedPageId={setSelectedPageId} />}
                                 {activeTab === 'templates' && <TemplatesTab results={results} />}
                                 {activeTab === 'issues' && <IssuesTabMulti results={results} />}
+                                {activeTab === 'performance' && <PerformanceTab results={results} />}
                                 {activeTab === 'strategy' && <StrategyTab results={results} />}
                             </>
                         ) : (
@@ -569,6 +572,7 @@
                                 {activeTab === 'overview' && <OverviewTabSingle results={results} exportCSV={exportCSV} exportJSON={exportJSON} exportHTML={exportHTML} />}
                                 {activeTab === 'categories' && <CategoriesTab results={results} />}
                                 {activeTab === 'issues' && <IssuesTabSingle results={results} />}
+                                {activeTab === 'performance' && <PerformanceTab results={results} />}
                                 {activeTab === 'quickwins' && <QuickWinsTab results={results} />}
                             </>
                         )}
@@ -982,6 +986,243 @@
                                 </div>
                             ))
                         )}
+                    </div>
+                </div>
+            );
+        }
+
+        function PerformanceTab({ results }) {
+            // Get pagespeed_full data (works for both single-page and multi-page)
+            const perfData = results.pagespeed_full || results.homepage?.pagespeed_full;
+
+            if (!perfData || !perfData.success) {
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                        <p className="text-gray-500">
+                            {perfData?.error ? `Błąd PageSpeed: ${perfData.error}` : 'Brak danych PageSpeed. Uruchom ponownie audyt.'}
+                        </p>
+                    </div>
+                );
+            }
+
+            const mobile = perfData.mobile;
+            const desktop = perfData.desktop;
+
+            const getScoreColor = (score) => {
+                if (score >= 90) return '#10b981';
+                if (score >= 50) return '#f59e0b';
+                return '#ef4444';
+            };
+
+            const getRatingColor = (rating) => {
+                if (rating === 'good') return {bg: '#166534', text: '#bbf7d0'};
+                if (rating === 'needs-improvement') return {bg: '#d97706', text: '#fef3c7'};
+                return {bg: '#991b1b', text: '#fca5a5'};
+            };
+
+            const getRatingLabel = (rating) => {
+                if (rating === 'good') return 'Dobry';
+                if (rating === 'needs-improvement') return 'Do poprawy';
+                return 'Słaby';
+            };
+
+            return (
+                <div className="space-y-6">
+                    {/* Scores Overview */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-xl font-bold mb-4">📊 Lighthouse Scores</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {/* Mobile */}
+                            <div>
+                                <h4 className="font-bold mb-3 flex items-center gap-2">
+                                    📱 Mobile
+                                </h4>
+                                <div className="space-y-3">
+                                    {Object.entries(mobile.scores).filter(([key]) => key !== 'average').map(([category, score]) => (
+                                        <div key={category}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-sm capitalize">{category === 'best_practices' ? 'Best Practices' : category}</span>
+                                                <span className="font-bold" style={{color: getScoreColor(score)}}>{score}/100</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="h-2 rounded-full transition-all" style={{width: `${score}%`, background: getScoreColor(score)}}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Desktop */}
+                            <div>
+                                <h4 className="font-bold mb-3 flex items-center gap-2">
+                                    🖥️ Desktop
+                                </h4>
+                                <div className="space-y-3">
+                                    {Object.entries(desktop.scores).filter(([key]) => key !== 'average').map(([category, score]) => (
+                                        <div key={category}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-sm capitalize">{category === 'best_practices' ? 'Best Practices' : category}</span>
+                                                <span className="font-bold" style={{color: getScoreColor(score)}}>{score}/100</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="h-2 rounded-full transition-all" style={{width: `${score}%`, background: getScoreColor(score)}}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Core Web Vitals */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-xl font-bold mb-4">⚡ Core Web Vitals</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {/* Mobile CWV */}
+                            <div>
+                                <h4 className="font-bold mb-3">📱 Mobile</h4>
+                                <div className="space-y-4">
+                                    {/* LCP */}
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(mobile.core_web_vitals.lcp.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">LCP (Largest Contentful Paint)</div>
+                                                <div className="text-2xl font-bold mt-1">{mobile.core_web_vitals.lcp.value_s}s</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(mobile.core_web_vitals.lcp.rating).bg,
+                                                color: getRatingColor(mobile.core_web_vitals.lcp.rating).text
+                                            }}>
+                                                {getRatingLabel(mobile.core_web_vitals.lcp.rating)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600">Powinno: &lt;2.5s (dobry), &lt;4.0s (do poprawy)</div>
+                                    </div>
+
+                                    {/* FID */}
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(mobile.core_web_vitals.fid.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">FID (First Input Delay)</div>
+                                                <div className="text-2xl font-bold mt-1">{mobile.core_web_vitals.fid.value}ms</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(mobile.core_web_vitals.fid.rating).bg,
+                                                color: getRatingColor(mobile.core_web_vitals.fid.rating).text
+                                            }}>
+                                                {getRatingLabel(mobile.core_web_vitals.fid.rating)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600">Powinno: &lt;100ms (dobry), &lt;300ms (do poprawy)</div>
+                                    </div>
+
+                                    {/* CLS */}
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(mobile.core_web_vitals.cls.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">CLS (Cumulative Layout Shift)</div>
+                                                <div className="text-2xl font-bold mt-1">{mobile.core_web_vitals.cls.value.toFixed(3)}</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(mobile.core_web_vitals.cls.rating).bg,
+                                                color: getRatingColor(mobile.core_web_vitals.cls.rating).text
+                                            }}>
+                                                {getRatingLabel(mobile.core_web_vitals.cls.rating)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600">Powinno: &lt;0.1 (dobry), &lt;0.25 (do poprawy)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Desktop CWV */}
+                            <div>
+                                <h4 className="font-bold mb-3">🖥️ Desktop</h4>
+                                <div className="space-y-4">
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(desktop.core_web_vitals.lcp.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">LCP</div>
+                                                <div className="text-2xl font-bold mt-1">{desktop.core_web_vitals.lcp.value_s}s</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(desktop.core_web_vitals.lcp.rating).bg,
+                                                color: getRatingColor(desktop.core_web_vitals.lcp.rating).text
+                                            }}>
+                                                {getRatingLabel(desktop.core_web_vitals.lcp.rating)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(desktop.core_web_vitals.fid.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">FID</div>
+                                                <div className="text-2xl font-bold mt-1">{desktop.core_web_vitals.fid.value}ms</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(desktop.core_web_vitals.fid.rating).bg,
+                                                color: getRatingColor(desktop.core_web_vitals.fid.rating).text
+                                            }}>
+                                                {getRatingLabel(desktop.core_web_vitals.fid.rating)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(desktop.core_web_vitals.cls.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">CLS</div>
+                                                <div className="text-2xl font-bold mt-1">{desktop.core_web_vitals.cls.value.toFixed(3)}</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(desktop.core_web_vitals.cls.rating).bg,
+                                                color: getRatingColor(desktop.core_web_vitals.cls.rating).text
+                                            }}>
+                                                {getRatingLabel(desktop.core_web_vitals.cls.rating)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Opportunities */}
+                    {mobile.opportunities && mobile.opportunities.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h3 className="text-xl font-bold mb-4">🎯 Top Optimization Opportunities (Mobile)</h3>
+                            <div className="space-y-3">
+                                {mobile.opportunities.map((opp, idx) => (
+                                    <div key={idx} className="border-l-4 border-orange-500 bg-orange-50 rounded-r p-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-bold flex-1">{opp.title}</h4>
+                                            <span className="px-3 py-1 rounded text-xs font-semibold ml-2" style={{background: '#f97316', color: '#fff'}}>
+                                                💾 ~{opp.savings_s}s
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-700" dangerouslySetInnerHTML={{__html: opp.description}}></p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Link to full PSI report */}
+                    <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                        <h3 className="text-lg font-bold mb-3">🔗 Pełny raport PageSpeed Insights</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Kliknij poniżej aby zobaczyć pełny raport z wszystkimi szczegółami technicznymi
+                        </p>
+                        <a
+                            href={mobile.psi_report_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block px-6 py-3 rounded-lg text-white font-semibold transition"
+                            style={{background: '#1e40af'}}
+                            onMouseEnter={(e) => e.target.style.background = '#1e3a8a'}
+                            onMouseLeave={(e) => e.target.style.background = '#1e40af'}
+                        >
+                            Otwórz pełny raport PageSpeed Insights ↗
+                        </a>
                     </div>
                 </div>
             );

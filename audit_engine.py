@@ -5,7 +5,7 @@ from analyzers.technical import analyze_technical
 from analyzers.onpage import analyze_onpage
 from analyzers.indexing import analyze_indexing
 from analyzers.content import analyze_content
-from analyzers.pagespeed import analyze_pagespeed
+from analyzers.pagespeed import analyze_pagespeed, analyze_pagespeed_full
 from analyzers.ai_content import analyze_ai_content, detect_page_language
 from analyzers.ai_action_plan import generate_ai_action_plan
 from config import WEIGHTS, ENABLE_AI_ANALYSIS, ENABLE_MULTI_PAGE_ANALYSIS, MAX_PAGES_TO_ANALYZE
@@ -221,6 +221,18 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
     except Exception as e:
         print(f"    Warning: PageSpeed failed: {e}")
         results['categories']['pagespeed'] = {'score': 0, 'error': str(e)}
+
+    # PageSpeed Full (desktop + mobile + all categories) - dla nowej zakładki Performance
+    print("  - PageSpeed Full analysis (mobile + desktop + all Lighthouse categories)...")
+    try:
+        results['pagespeed_full'] = analyze_pagespeed_full(url)
+        if results['pagespeed_full']['success']:
+            mobile_perf = results['pagespeed_full']['mobile']['scores']['performance']
+            desktop_perf = results['pagespeed_full']['desktop']['scores']['performance']
+            print(f"    Mobile: {mobile_perf}/100, Desktop: {desktop_perf}/100")
+    except Exception as e:
+        print(f"    Warning: PageSpeed Full failed: {e}")
+        results['pagespeed_full'] = {'success': False, 'error': str(e)}
 
     # AI Content Analysis (optional, może zająć chwilę)
     if ENABLE_AI_ANALYSIS:
