@@ -91,7 +91,8 @@ Start with opening brace and end with closing brace.
 
   "template_insights": [
     {{
-      "template_name": "e.g., product_page, category_page, blog_post",
+      "template_name": "MUST match page_type from analyzed pages (e.g., homepage, product, category, blog_post, about, contact)",
+      "page_type": "MUST be one of the page types analyzed",
       "pages_affected": "approximate number or 'all product pages'",
       "critical_issues": ["issue 1", "issue 2"],
       "seo_impact": "HIGH|MEDIUM|LOW",
@@ -185,6 +186,8 @@ Start with opening brace and end with closing brace.
 - If multiple pages use same template, note this
 - Template fixes have exponential impact
 - Example: "All product pages (estimated 50+) lack structured data" → HIGH priority
+- CRITICAL: Map each template_insight to a specific page_type from the analyzed pages
+- Use page_type field to connect insights to analyzed pages (e.g., "homepage", "product", "category", "blog_post", "about", "contact")
 
 **BUSINESS VALUE:**
 - Every recommendation must tie to business outcomes
