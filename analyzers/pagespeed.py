@@ -1,5 +1,6 @@
 # analyzers/pagespeed.py
 import requests
+import time
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -98,6 +99,10 @@ def analyze_pagespeed_full(url):
         mobile_data = fetch_psi_data_full(url, 'mobile')
         results['mobile'] = parse_psi_data_full(mobile_data)
 
+        # Rate limiting: Wait 2s between requests to respect Google's rate limits
+        # (Prevents 429 Too Many Requests when doing mobile + desktop in quick succession)
+        time.sleep(2)
+
         # Fetch desktop data (all categories)
         desktop_data = fetch_psi_data_full(url, 'desktop')
         results['desktop'] = parse_psi_data_full(desktop_data)
@@ -126,6 +131,12 @@ def fetch_psi_data(url, strategy='mobile'):
 
     response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
 
+    # Rate limit handling - retry once after 5s if we hit 429
+    if response.status_code == 429:
+        print(f"  [PageSpeed] Rate limit hit (429), waiting 5s and retrying...")
+        time.sleep(5)
+        response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
+
     # Lepszy error handling
     if response.status_code == 403:
         raise Exception("403 Forbidden - Sprawdź uprawnienia API key w Google Cloud Console. Kliknij na API key → Edit → API restrictions → USUŃ restrykcje lub dodaj PageSpeed Insights API do listy dozwolonych.")
@@ -149,6 +160,12 @@ def fetch_psi_data_full(url, strategy='mobile'):
         params['key'] = GOOGLE_PSI_API_KEY
 
     response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
+
+    # Rate limit handling - retry once after 5s if we hit 429
+    if response.status_code == 429:
+        print(f"  [PageSpeed] Rate limit hit (429), waiting 5s and retrying...")
+        time.sleep(5)
+        response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
 
     if response.status_code == 403:
         raise Exception("403 Forbidden - Sprawdź uprawnienia API key")
