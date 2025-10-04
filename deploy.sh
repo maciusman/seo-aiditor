@@ -86,25 +86,32 @@ fi
 AFTER_COMMIT=$(/usr/bin/git rev-parse HEAD)
 log "New commit: $AFTER_COMMIT"
 
-# Restart application service (no sudo needed - script runs as root)
+# Restart application service (no redirect to avoid deadlock)
 log "Restarting seoaiditor service..."
-if /bin/systemctl restart seoaiditor >> "$LOG_FILE" 2>&1; then
-    log "✓ Service restart initiated"
+
+# Execute restart command - suppress output to /dev/null (not to log file)
+/bin/systemctl restart seoaiditor &> /dev/null
+RESTART_EXIT_CODE=$?
+
+# Log the result
+if [ $RESTART_EXIT_CODE -eq 0 ]; then
+    log "✓ Service restart command completed (exit code 0)"
 else
-    log "ERROR: Failed to restart service"
+    log "ERROR: Service restart failed (exit code $RESTART_EXIT_CODE)"
     exit 1
 fi
 
 # Wait for service to stabilize
 /bin/sleep 3
 
-# Check service status
+# Check service status (quiet mode - only checks exit code)
 if /bin/systemctl is-active --quiet seoaiditor; then
     log "✓ Deployment successful! Service is running."
     log "  Deployed commit: $(/usr/bin/git log -1 --oneline)"
 else
     log "✗ Deployment failed! Service is not running."
-    /bin/systemctl status seoaiditor >> "$LOG_FILE" 2>&1
+    # Get status for debugging (this is safe - last operation before exit)
+    /bin/systemctl status seoaiditor &>> "$LOG_FILE"
     exit 1
 fi
 
