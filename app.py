@@ -8,6 +8,9 @@ from audit_engine import run_audit
 import os
 import queue
 import threading
+import hmac
+import hashlib
+import subprocess
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)  # Enable CORS for frontend communication
@@ -561,6 +564,106 @@ def generate_fallback_html(results):
     <pre>{results_json}</pre>
 </body>
 </html>"""
+
+@app.route('/webhook/deploy', methods=['POST'])
+def deploy_webhook():
+    """
+    GitHub webhook endpoint for automatic deployment.
+
+    Security: Validates HMAC-SHA256 signature from GitHub.
+    Only requests with valid signature will trigger deployment.
+
+    Setup:
+    1. Set WEBHOOK_SECRET environment variable on server
+    2. Configure GitHub webhook with same secret
+    3. GitHub sends POST to this endpoint on push
+    4. Server validates signature and runs deploy.sh
+
+    GitHub signature header: X-Hub-Signature-256
+    Format: sha256=<hmac_hex>
+    """
+
+    # Get webhook secret from environment (set this on VPS)
+    webhook_secret = os.environ.get('WEBHOOK_SECRET', '')
+
+    if not webhook_secret:
+        print("[WEBHOOK] ERROR: WEBHOOK_SECRET not configured")
+        return jsonify({'error': 'Webhook not configured'}), 500
+
+    # Get GitHub signature from header
+    github_signature = request.headers.get('X-Hub-Signature-256', '')
+
+    if not github_signature:
+        print("[WEBHOOK] ERROR: No signature provided")
+        return jsonify({'error': 'No signature'}), 403
+
+    # Get request body (raw bytes for HMAC validation)
+    payload = request.get_data()
+
+    # Calculate expected signature
+    expected_signature = 'sha256=' + hmac.new(
+        webhook_secret.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+
+    # Verify signature (constant-time comparison to prevent timing attacks)
+    if not hmac.compare_digest(github_signature, expected_signature):
+        print("[WEBHOOK] ERROR: Invalid signature")
+        print(f"  Expected: {expected_signature}")
+        print(f"  Received: {github_signature}")
+        return jsonify({'error': 'Invalid signature'}), 403
+
+    # Signature valid - parse payload
+    try:
+        data = json.loads(payload)
+        repo_name = data.get('repository', {}).get('full_name', 'unknown')
+        pusher = data.get('pusher', {}).get('name', 'unknown')
+        ref = data.get('ref', 'unknown')
+
+        print(f"[WEBHOOK] Valid request from GitHub")
+        print(f"  Repository: {repo_name}")
+        print(f"  Pusher: {pusher}")
+        print(f"  Branch: {ref}")
+
+        # Only deploy on push to master branch
+        if ref != 'refs/heads/master':
+            print(f"[WEBHOOK] Ignoring push to {ref} (not master)")
+            return jsonify({'status': 'ignored', 'reason': 'not master branch'}), 200
+
+    except Exception as e:
+        print(f"[WEBHOOK] ERROR parsing payload: {e}")
+        return jsonify({'error': 'Invalid payload'}), 400
+
+    # Run deployment script in background (non-blocking)
+    try:
+        deploy_script = '/var/www/seo-aiditor/deploy.sh'
+
+        # Check if script exists and is executable
+        if not os.path.isfile(deploy_script):
+            print(f"[WEBHOOK] ERROR: Deploy script not found: {deploy_script}")
+            return jsonify({'error': 'Deploy script not found'}), 500
+
+        # Execute deploy script in background
+        subprocess.Popen(
+            ['/bin/bash', deploy_script],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True  # Detach from parent process
+        )
+
+        print(f"[WEBHOOK] Deployment started by {pusher}")
+
+        return jsonify({
+            'status': 'deploying',
+            'repository': repo_name,
+            'pusher': pusher,
+            'branch': 'master'
+        }), 200
+
+    except Exception as e:
+        print(f"[WEBHOOK] ERROR executing deploy script: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     print("Starting SEO AIditor API Server...")

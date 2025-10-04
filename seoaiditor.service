@@ -8,6 +8,7 @@ Group=root
 WorkingDirectory=/var/www/seo-aiditor
 Environment="PATH=/var/www/seo-aiditor/venv/bin"
 Environment="PRODUCTION=true"
+Environment="WEBHOOK_SECRET=CHANGE_ME_ON_VPS"
 ExecStart=/var/www/seo-aiditor/venv/bin/gunicorn --workers 3 --timeout 300 --bind '[::]:5000' wsgi:application
 Restart=always
 RestartSec=10
