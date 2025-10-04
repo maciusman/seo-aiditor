@@ -95,18 +95,19 @@ def analyze_pagespeed_full(url):
     }
 
     try:
-        # Fetch mobile data (all categories)
+        # TEMPORARY: Only fetch mobile to test if desktop is causing 429
+        # Fetch mobile data (currently only performance category)
         mobile_data = fetch_psi_data_full(url, 'mobile')
         results['mobile'] = parse_psi_data_full(mobile_data)
 
+        # TEMPORARY: Skip desktop to avoid 429 - will re-enable after fixing category issue
         # Rate limiting: Wait 5s between requests to respect Google's rate limits
-        # (Increased from 2s to 5s to prevent 429 Too Many Requests)
-        # Google seems to have tightened rate limits - longer delay needed
-        time.sleep(5)
+        # time.sleep(5)
+        # desktop_data = fetch_psi_data_full(url, 'desktop')
+        # results['desktop'] = parse_psi_data_full(desktop_data)
 
-        # Fetch desktop data (all categories)
-        desktop_data = fetch_psi_data_full(url, 'desktop')
-        results['desktop'] = parse_psi_data_full(desktop_data)
+        # For now, use mobile data for both (temporary workaround)
+        results['desktop'] = results['mobile']
 
         results['success'] = True
 
@@ -160,7 +161,9 @@ def fetch_psi_data_full(url, strategy='mobile'):
     params = {
         'url': url,
         'strategy': strategy,
-        'category': ['performance', 'accessibility', 'best-practices', 'seo']
+        # TEMPORARY FIX: Only performance category to avoid 429
+        # TODO: Implement sequential fetching for all categories if this works
+        'category': 'performance'  # Was: ['performance', 'accessibility', 'best-practices', 'seo']
     }
 
     # Dodaj API key tylko jeśli jest ustawiony
