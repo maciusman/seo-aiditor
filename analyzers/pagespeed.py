@@ -99,9 +99,10 @@ def analyze_pagespeed_full(url):
         mobile_data = fetch_psi_data_full(url, 'mobile')
         results['mobile'] = parse_psi_data_full(mobile_data)
 
-        # Rate limiting: Wait 2s between requests to respect Google's rate limits
-        # (Prevents 429 Too Many Requests when doing mobile + desktop in quick succession)
-        time.sleep(2)
+        # Rate limiting: Wait 5s between requests to respect Google's rate limits
+        # (Increased from 2s to 5s to prevent 429 Too Many Requests)
+        # Google seems to have tightened rate limits - longer delay needed
+        time.sleep(5)
 
         # Fetch desktop data (all categories)
         desktop_data = fetch_psi_data_full(url, 'desktop')
@@ -129,13 +130,20 @@ def fetch_psi_data(url, strategy='mobile'):
     if GOOGLE_PSI_API_KEY and GOOGLE_PSI_API_KEY != "YOUR_API_KEY_HERE":
         params['key'] = GOOGLE_PSI_API_KEY
 
+    # Pre-emptive delay before request (helps with rate limiting)
+    time.sleep(1)
+
     response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
 
-    # Rate limit handling - retry once after 5s if we hit 429
-    if response.status_code == 429:
-        print(f"  [PageSpeed] Rate limit hit (429), waiting 5s and retrying...")
-        time.sleep(5)
-        response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
+    # Exponential backoff retry for 429 (2 attempts: 5s, then 10s)
+    retry_delays = [5, 10]
+    for attempt, delay in enumerate(retry_delays, start=1):
+        if response.status_code == 429:
+            print(f"  [PageSpeed] Rate limit hit (429), attempt {attempt}/{len(retry_delays)}, waiting {delay}s...")
+            time.sleep(delay)
+            response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
+        else:
+            break  # Success or other error - exit retry loop
 
     # Lepszy error handling
     if response.status_code == 403:
@@ -159,13 +167,20 @@ def fetch_psi_data_full(url, strategy='mobile'):
     if GOOGLE_PSI_API_KEY and GOOGLE_PSI_API_KEY != "YOUR_API_KEY_HERE":
         params['key'] = GOOGLE_PSI_API_KEY
 
+    # Pre-emptive delay before request (helps with rate limiting)
+    time.sleep(1)
+
     response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
 
-    # Rate limit handling - retry once after 5s if we hit 429
-    if response.status_code == 429:
-        print(f"  [PageSpeed] Rate limit hit (429), waiting 5s and retrying...")
-        time.sleep(5)
-        response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
+    # Exponential backoff retry for 429 (2 attempts: 5s, then 10s)
+    retry_delays = [5, 10]
+    for attempt, delay in enumerate(retry_delays, start=1):
+        if response.status_code == 429:
+            print(f"  [PageSpeed] Rate limit hit (429), attempt {attempt}/{len(retry_delays)}, waiting {delay}s...")
+            time.sleep(delay)
+            response = requests.get(endpoint, params=params, timeout=PSI_TIMEOUT)
+        else:
+            break  # Success or other error - exit retry loop
 
     if response.status_code == 403:
         raise Exception("403 Forbidden - Sprawdź uprawnienia API key")
