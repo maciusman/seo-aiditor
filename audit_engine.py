@@ -10,27 +10,37 @@ from analyzers.ai_content import analyze_ai_content, detect_page_language
 from analyzers.ai_action_plan import generate_ai_action_plan
 from config import WEIGHTS, ENABLE_AI_ANALYSIS, ENABLE_MULTI_PAGE_ANALYSIS, MAX_PAGES_TO_ANALYZE
 
-def run_audit(url, multi_page=None):
+def run_audit(url, multi_page=None, progress_callback=None):
     """
     Uruchom pełny audyt SEO (single-page lub multi-page)
 
     Args:
         url: Homepage URL
         multi_page: Enable multi-page analysis (None = use config default, True/False = override)
+        progress_callback: Optional function(percent, message, details) for progress updates
 
     Returns:
         dict: Audit results (structure varies based on single/multi-page mode)
     """
 
+    # Helper function to emit progress
+    def emit_progress(percent, message, details=None):
+        """Emit progress event if callback is provided"""
+        print(f"[{percent}%] {message}")  # Console logging
+        if progress_callback:
+            progress_callback(percent, message, details)
+
     # Determine if multi-page is enabled
     enable_multi_page = multi_page if multi_page is not None else ENABLE_MULTI_PAGE_ANALYSIS
 
     # 1. Walidacja URL
+    emit_progress(0, "Validating URL...")
     url = validate_url(url)
     if not url:
         return {'error': 'Invalid URL'}
 
     # 2. Pobierz homepage
+    emit_progress(5, f"Fetching homepage: {url}")
     print(f"Fetching {url}...")
     page_data = fetch_url(url)
 
@@ -43,10 +53,12 @@ def run_audit(url, multi_page=None):
     html_content = page_data['content']
 
     # Detect language early
+    emit_progress(10, "Detecting page language...")
     detected_language = detect_page_language(html_content)
     print(f"  - Detected language: {detected_language}")
 
     # 3. Run standard single-page audit on homepage
+    emit_progress(15, "Analyzing homepage (technical, on-page, content)...")
     print("Running homepage analyzers...")
     homepage_results = run_single_page_audit(url, page_data, html_content, detected_language)
 
@@ -60,6 +72,7 @@ def run_audit(url, multi_page=None):
             from analyzers.ai_multi_page import analyze_site_holistically
 
             # STAGE 1: Crawl homepage & AI selects pages
+            emit_progress(35, "Crawling homepage for internal links...")
             print("[STAGE 1] Crawling homepage and detecting site type...")
             crawl_result = crawl_homepage(url)
 
@@ -70,8 +83,10 @@ def run_audit(url, multi_page=None):
 
             available_links = crawl_result['links']
             print(f"  - Found {len(available_links)} internal links")
+            emit_progress(40, f"Found {len(available_links)} internal links")
 
             # AI detects site type and selects pages
+            emit_progress(45, "AI analyzing site type and selecting pages...")
             print("[STAGE 1] AI selecting representative pages...")
             selection_result = detect_site_type_and_select_pages(
                 url=url,
@@ -90,14 +105,17 @@ def run_audit(url, multi_page=None):
 
             print(f"  - Site type: {site_type} (confidence: {selection_result.get('site_type_confidence', 0)}%)")
             print(f"  - Selected {len(selected_pages)} additional pages")
+            emit_progress(55, f"Site type: {site_type}. Selected {len(selected_pages)} pages to analyze")
 
             # STAGE 1.5: Fetch selected pages in parallel
+            emit_progress(60, f"Fetching {len(selected_pages)} selected pages...")
             print("[STAGE 1.5] Fetching selected pages in parallel...")
             urls_to_fetch = [page['url'] for page in selected_pages]
             fetched_pages = fetch_selected_pages(urls_to_fetch, timeout_per_page=10)
 
             successful_pages = [p for p in fetched_pages if p['success']]
             print(f"  - Successfully fetched {len(successful_pages)}/{len(fetched_pages)} pages")
+            emit_progress(70, f"Fetched {len(successful_pages)}/{len(fetched_pages)} pages successfully")
 
             # Merge page data with selection metadata
             pages_for_analysis = []
@@ -113,6 +131,7 @@ def run_audit(url, multi_page=None):
                 })
 
             # STAGE 2: Holistic AI analysis
+            emit_progress(75, f"Running AI holistic analysis on {len(pages_for_analysis) + 1} pages (30-60s)...")
             print(f"[STAGE 2] AI holistic analysis of {len(pages_for_analysis) + 1} pages (this may take 30-40s)...")
             holistic_result = analyze_site_holistically(
                 homepage_url=url,
@@ -129,6 +148,7 @@ def run_audit(url, multi_page=None):
             print(f"  - Holistic score: {holistic_result.get('holistic_score', 0)}/100")
             print(f"  - Template insights: {len(holistic_result.get('template_insights', []))}")
             print(f"  - Scalable recommendations: {len(holistic_result.get('scalable_recommendations', []))}")
+            emit_progress(90, f"AI analysis complete. Building final results...")
 
             # 5. Build multi-page response
             multi_page_results = {
@@ -164,6 +184,7 @@ def run_audit(url, multi_page=None):
                 'grade': homepage_results['grade']
             }
 
+            emit_progress(100, "Multi-page audit complete!")
             print("\n=== MULTI-PAGE AUDIT COMPLETE ===")
             return multi_page_results
 
@@ -172,6 +193,7 @@ def run_audit(url, multi_page=None):
             print(f"  Falling back to single-page audit")
             import traceback
             traceback.print_exc()
+            emit_progress(100, "Audit complete (fallback to single-page)")
             return homepage_results
 
     else:
@@ -181,6 +203,7 @@ def run_audit(url, multi_page=None):
         if not ENABLE_AI_ANALYSIS:
             print("  AI analysis disabled (required for multi-page)")
 
+        emit_progress(100, "Single-page audit complete!")
         return homepage_results
 
 

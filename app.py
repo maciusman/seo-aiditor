@@ -6,6 +6,8 @@ import datetime
 from urllib.parse import urlparse
 from audit_engine import run_audit
 import os
+import queue
+import threading
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)  # Enable CORS for frontend communication
@@ -112,6 +114,206 @@ def audit():
                 os.environ['GOOGLE_PSI_API_KEY'] = original_psi
 
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/audit-stream', methods=['POST'])
+def audit_stream():
+    """
+    SSE Streaming endpoint for real-time audit progress.
+
+    This endpoint returns Server-Sent Events (SSE) to bypass reverse proxy timeout limits.
+    Instead of waiting 120+ seconds for a single response, it sends progress updates
+    every few seconds, keeping the connection alive.
+
+    SSE Format:
+        data: {"type": "progress", "percent": 25, "message": "Crawling links..."}
+
+        data: {"type": "complete", "results": {...full audit data...}}
+
+    Frontend usage:
+        const response = await fetch('/api/audit-stream', {method: 'POST', ...});
+        const reader = response.body.getReader();
+        // Read stream chunks...
+    """
+
+    def generate():
+        """Generator function that yields SSE events"""
+        import config
+
+        try:
+            # Parse request data
+            data = request.get_json()
+            url = data.get('url')
+
+            if not url:
+                yield f"data: {json.dumps({'type': 'error', 'message': 'URL is required'})}\n\n"
+                return
+
+            # Production mode: Accept API keys from user
+            if config.REQUIRE_USER_API_KEYS:
+                user_gemini_key = data.get('gemini_key')
+                user_psi_key = data.get('psi_key', '')
+
+                if not user_gemini_key:
+                    yield f"data: {json.dumps({'type': 'error', 'message': 'Gemini API key is required'})}\n\n"
+                    return
+
+                # Set user-provided keys
+                original_gemini = os.environ.get('GEMINI_API_KEY')
+                original_psi = os.environ.get('GOOGLE_PSI_API_KEY')
+
+                try:
+                    os.environ['GEMINI_API_KEY'] = user_gemini_key
+                    os.environ['GOOGLE_PSI_API_KEY'] = user_psi_key
+
+                    # Create a queue for progress events (thread-safe communication)
+                    progress_queue = queue.Queue()
+
+                    # Progress callback function - runs in audit thread
+                    def progress_callback(percent, message, details=None):
+                        """Called by audit_engine to report progress"""
+                        event_data = {
+                            'type': 'progress',
+                            'percent': percent,
+                            'message': message
+                        }
+                        if details:
+                            event_data['details'] = details
+
+                        # Put event in queue (thread-safe)
+                        progress_queue.put(event_data)
+
+                    # Run audit in separate thread (so we can yield events as they arrive)
+                    audit_result = {'data': None, 'error': None}
+
+                    def run_audit_thread():
+                        """Thread function to run audit"""
+                        try:
+                            result = run_audit(url, progress_callback=progress_callback)
+                            audit_result['data'] = result
+                        except Exception as e:
+                            audit_result['error'] = str(e)
+                        finally:
+                            # Signal completion
+                            progress_queue.put({'type': 'DONE'})
+
+                    # Start audit thread
+                    thread = threading.Thread(target=run_audit_thread)
+                    thread.start()
+
+                    # Initial progress event
+                    yield f"data: {json.dumps({'type': 'progress', 'percent': 0, 'message': 'Starting audit...'})}\n\n"
+
+                    # Yield progress events as they arrive in queue
+                    while True:
+                        try:
+                            # Wait for next event (with timeout to prevent hanging)
+                            event = progress_queue.get(timeout=1)
+
+                            if event.get('type') == 'DONE':
+                                # Audit finished
+                                break
+
+                            # Yield progress event
+                            yield f"data: {json.dumps(event)}\n\n"
+
+                        except queue.Empty:
+                            # No event yet, send keepalive (prevents timeout)
+                            yield f": keepalive\n\n"
+                            continue
+
+                    # Wait for thread to finish
+                    thread.join(timeout=10)
+
+                    # Get final results
+                    results = audit_result['data']
+                    error = audit_result['error']
+
+                    if error:
+                        yield f"data: {json.dumps({'type': 'error', 'message': error})}\n\n"
+                        return
+
+                    # Send final results
+                    if 'error' in results:
+                        yield f"data: {json.dumps({'type': 'error', 'message': results['error']})}\n\n"
+                    else:
+                        yield f"data: {json.dumps({'type': 'complete', 'results': results})}\n\n"
+
+                finally:
+                    # Cleanup environment
+                    if original_gemini is not None:
+                        os.environ['GEMINI_API_KEY'] = original_gemini
+                    elif 'GEMINI_API_KEY' in os.environ:
+                        del os.environ['GEMINI_API_KEY']
+
+                    if original_psi is not None:
+                        os.environ['GOOGLE_PSI_API_KEY'] = original_psi
+                    elif 'GOOGLE_PSI_API_KEY' in os.environ:
+                        del os.environ['GOOGLE_PSI_API_KEY']
+
+            else:
+                # Local mode - same threading pattern
+                progress_queue = queue.Queue()
+
+                def progress_callback(percent, message, details=None):
+                    event_data = {
+                        'type': 'progress',
+                        'percent': percent,
+                        'message': message
+                    }
+                    if details:
+                        event_data['details'] = details
+                    progress_queue.put(event_data)
+
+                audit_result = {'data': None, 'error': None}
+
+                def run_audit_thread():
+                    try:
+                        result = run_audit(url, progress_callback=progress_callback)
+                        audit_result['data'] = result
+                    except Exception as e:
+                        audit_result['error'] = str(e)
+                    finally:
+                        progress_queue.put({'type': 'DONE'})
+
+                thread = threading.Thread(target=run_audit_thread)
+                thread.start()
+
+                yield f"data: {json.dumps({'type': 'progress', 'percent': 0, 'message': 'Starting audit...'})}\n\n"
+
+                while True:
+                    try:
+                        event = progress_queue.get(timeout=1)
+                        if event.get('type') == 'DONE':
+                            break
+                        yield f"data: {json.dumps(event)}\n\n"
+                    except queue.Empty:
+                        yield f": keepalive\n\n"
+                        continue
+
+                thread.join(timeout=10)
+                results = audit_result['data']
+                error = audit_result['error']
+
+                if error:
+                    yield f"data: {json.dumps({'type': 'error', 'message': error})}\n\n"
+                elif 'error' in results:
+                    yield f"data: {json.dumps({'type': 'error', 'message': results['error']})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'type': 'complete', 'results': results})}\n\n"
+
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+    # Return SSE response with correct headers
+    return Response(
+        generate(),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',  # Disable nginx buffering
+            'Connection': 'keep-alive'
+        }
+    )
 
 @app.route('/api/export/json', methods=['POST'])
 def export_json():

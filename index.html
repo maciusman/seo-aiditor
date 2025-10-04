@@ -327,33 +327,10 @@
                 setProgress(0);
                 setError(null);
                 setAuditResults(null);
+                setCurrentStep('Initializing audit...');
 
                 try {
-                    const progressSteps = [
-                        'Pobieranie strony głównej...',
-                        'Analiza techniczna...',
-                        'Analiza on-page SEO...',
-                        'Sprawdzanie indeksowania...',
-                        'Analiza treści...',
-                        'AI: Analiza jakości treści...',
-                        'AI: Wykrywanie typu witryny...',
-                        'AI: Wybór reprezentatywnych stron...',
-                        'Pobieranie dodatkowych stron...',
-                        'AI: Holistyczna analiza...',
-                        'Generowanie rekomendacji...',
-                        'PageSpeed Full analysis...'
-                    ];
-
-                    let stepIndex = 0;
-                    const progressInterval = setInterval(() => {
-                        if (stepIndex < progressSteps.length) {
-                            setCurrentStep(progressSteps[stepIndex]);
-                            setProgress(Math.min((stepIndex / progressSteps.length) * 90, 90));
-                            stepIndex++;
-                        }
-                    }, 4000);
-
-                    const API_URL = getApiUrl('/api/audit');
+                    const API_URL = getApiUrl('/api/audit-stream');
 
                     // Build request body
                     const requestBody = { url: url };
@@ -362,6 +339,7 @@
                         requestBody.psi_key = apiKeys.psi;
                     }
 
+                    // Fetch with streaming response
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: {
@@ -370,18 +348,59 @@
                         body: JSON.stringify(requestBody)
                     });
 
-                    clearInterval(progressInterval);
-
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Błąd podczas audytu');
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
 
-                    const results = await response.json();
+                    // Read streaming response (SSE format)
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
 
-                    setProgress(100);
-                    setCurrentStep('Audyt ukończony!');
-                    setAuditResults(results);
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (done) break;
+
+                        // Decode chunk and add to buffer
+                        buffer += decoder.decode(value, { stream: true });
+
+                        // Process complete SSE messages (ending with \n\n)
+                        let newlineIndex;
+                        while ((newlineIndex = buffer.indexOf('\n\n')) !== -1) {
+                            const message = buffer.slice(0, newlineIndex);
+                            buffer = buffer.slice(newlineIndex + 2);
+
+                            // Skip keepalive messages (start with ":")
+                            if (message.startsWith(':')) continue;
+
+                            // Parse SSE message (format: "data: {...}")
+                            if (message.startsWith('data: ')) {
+                                try {
+                                    const jsonStr = message.slice(6); // Remove "data: " prefix
+                                    const event = JSON.parse(jsonStr);
+
+                                    console.log('SSE Event:', event);
+
+                                    if (event.type === 'progress') {
+                                        // Update real-time progress
+                                        setProgress(event.percent);
+                                        setCurrentStep(event.message);
+                                    } else if (event.type === 'complete') {
+                                        // Audit finished - display results
+                                        setProgress(100);
+                                        setCurrentStep('Audit complete!');
+                                        setAuditResults(event.results);
+                                    } else if (event.type === 'error') {
+                                        // Error occurred
+                                        throw new Error(event.message);
+                                    }
+                                } catch (parseErr) {
+                                    console.error('Failed to parse SSE event:', message, parseErr);
+                                }
+                            }
+                        }
+                    }
 
                 } catch (err) {
                     setError(err.message);
