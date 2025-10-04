@@ -135,14 +135,25 @@ def audit_stream():
         // Read stream chunks...
     """
 
+    # Parse request data OUTSIDE generator (to access Flask request context)
+    import config
+
+    try:
+        data = request.get_json()
+    except Exception as e:
+        # If JSON parsing fails, return error immediately
+        def error_gen():
+            yield f"data: {json.dumps({'type': 'error', 'message': f'Invalid JSON: {str(e)}'})}\n\n"
+        return Response(error_gen(), mimetype='text/event-stream')
+
+    url = data.get('url')
+    user_gemini_key = data.get('gemini_key') if config.REQUIRE_USER_API_KEYS else None
+    user_psi_key = data.get('psi_key', '') if config.REQUIRE_USER_API_KEYS else None
+
     def generate():
         """Generator function that yields SSE events"""
-        import config
 
         try:
-            # Parse request data
-            data = request.get_json()
-            url = data.get('url')
 
             if not url:
                 yield f"data: {json.dumps({'type': 'error', 'message': 'URL is required'})}\n\n"
@@ -150,9 +161,6 @@ def audit_stream():
 
             # Production mode: Accept API keys from user
             if config.REQUIRE_USER_API_KEYS:
-                user_gemini_key = data.get('gemini_key')
-                user_psi_key = data.get('psi_key', '')
-
                 if not user_gemini_key:
                     yield f"data: {json.dumps({'type': 'error', 'message': 'Gemini API key is required'})}\n\n"
                     return
