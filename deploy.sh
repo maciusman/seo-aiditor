@@ -2,53 +2,111 @@
 # Auto-deployment script for SEO AIditor
 # Triggered by GitHub webhook on git push
 
-set -e  # Exit on error
-
 DEPLOY_DIR="/var/www/seo-aiditor"
 LOG_FILE="$DEPLOY_DIR/deploy.log"
 
-echo "=======================================" >> "$LOG_FILE"
-echo "Deployment started at $(date)" >> "$LOG_FILE"
-echo "=======================================" >> "$LOG_FILE"
+# Function for logging with timestamp
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+}
+
+# Function to run command with timeout
+run_with_timeout() {
+    local timeout=$1
+    shift
+    timeout "$timeout" "$@"
+    return $?
+}
+
+log "======================================="
+log "Deployment started"
+log "======================================="
 
 # Navigate to project directory
-cd "$DEPLOY_DIR"
+cd "$DEPLOY_DIR" || {
+    log "ERROR: Cannot cd to $DEPLOY_DIR"
+    exit 1
+}
 
-# Fetch latest changes from GitHub
-echo "Fetching from GitHub..." >> "$LOG_FILE"
-git fetch origin master 2>&1 >> "$LOG_FILE"
+# Test GitHub connectivity
+log "Testing GitHub connectivity..."
+if ! run_with_timeout 5 ping -c 1 github.com &> /dev/null; then
+    log "WARNING: Cannot ping github.com (may be blocked, continuing anyway)"
+fi
+
+# Check current commit
+BEFORE_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+log "Current commit: $BEFORE_COMMIT"
+
+# Fetch latest changes with timeout
+log "Fetching from GitHub (timeout: 30s)..."
+if run_with_timeout 30 git fetch origin master >> "$LOG_FILE" 2>&1; then
+    log "✓ Git fetch completed"
+else
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -eq 124 ]; then
+        log "ERROR: git fetch timed out after 30s"
+        # Kill any hanging git processes
+        pkill -9 git 2>/dev/null
+        exit 1
+    else
+        log "WARNING: git fetch returned exit code $EXIT_CODE (continuing anyway)"
+    fi
+fi
 
 # Check if there are new commits
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/master)
 
 if [ "$LOCAL" = "$REMOTE" ]; then
-    echo "Already up to date. No deployment needed." >> "$LOG_FILE"
+    log "Already up to date. No deployment needed."
+    log "======================================="
     exit 0
 fi
 
-# Pull latest changes
-echo "Pulling changes from origin/master..." >> "$LOG_FILE"
-git pull origin master 2>&1 >> "$LOG_FILE"
+log "New commits detected: $LOCAL -> $REMOTE"
+
+# Pull latest changes with timeout
+log "Pulling changes from origin/master (timeout: 30s)..."
+if run_with_timeout 30 git pull origin master >> "$LOG_FILE" 2>&1; then
+    log "✓ Git pull completed"
+else
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -eq 124 ]; then
+        log "ERROR: git pull timed out after 30s"
+        pkill -9 git 2>/dev/null
+        exit 1
+    else
+        log "ERROR: git pull failed with exit code $EXIT_CODE"
+        exit 1
+    fi
+fi
+
+# Verify deployment
+AFTER_COMMIT=$(git rev-parse HEAD)
+log "New commit: $AFTER_COMMIT"
 
 # Restart application service
-echo "Restarting seoaiditor service..." >> "$LOG_FILE"
-sudo systemctl restart seoaiditor 2>&1 >> "$LOG_FILE"
+log "Restarting seoaiditor service..."
+if sudo systemctl restart seoaiditor >> "$LOG_FILE" 2>&1; then
+    log "✓ Service restart initiated"
+else
+    log "ERROR: Failed to restart service"
+    exit 1
+fi
 
 # Wait for service to stabilize
-sleep 2
+sleep 3
 
 # Check service status
 if systemctl is-active --quiet seoaiditor; then
-    echo "✓ Deployment successful! Service is running." >> "$LOG_FILE"
-    echo "  Deployed commit: $(git log -1 --oneline)" >> "$LOG_FILE"
+    log "✓ Deployment successful! Service is running."
+    log "  Deployed commit: $(git log -1 --oneline)"
 else
-    echo "✗ Deployment failed! Service is not running." >> "$LOG_FILE"
+    log "✗ Deployment failed! Service is not running."
     systemctl status seoaiditor >> "$LOG_FILE" 2>&1
     exit 1
 fi
 
-echo "=======================================" >> "$LOG_FILE"
-echo "" >> "$LOG_FILE"
-
+log "======================================="
 exit 0
