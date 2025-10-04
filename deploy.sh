@@ -86,9 +86,9 @@ fi
 AFTER_COMMIT=$(/usr/bin/git rev-parse HEAD)
 log "New commit: $AFTER_COMMIT"
 
-# Restart application service
+# Restart application service (no sudo needed - script runs as root)
 log "Restarting seoaiditor service..."
-if /usr/bin/sudo /bin/systemctl restart seoaiditor >> "$LOG_FILE" 2>&1; then
+if /bin/systemctl restart seoaiditor >> "$LOG_FILE" 2>&1; then
     log "✓ Service restart initiated"
 else
     log "ERROR: Failed to restart service"
