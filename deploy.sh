@@ -86,33 +86,38 @@ fi
 AFTER_COMMIT=$(/usr/bin/git rev-parse HEAD)
 log "New commit: $AFTER_COMMIT"
 
-# Restart application service (no redirect to avoid deadlock)
-log "Restarting seoaiditor service..."
+# Restart application service (detached from parent process to avoid deadlock)
+log "Restarting seoaiditor service (detached mode)..."
 
-# Execute restart command - suppress output to /dev/null (not to log file)
-/bin/systemctl restart seoaiditor &> /dev/null
-RESTART_EXIT_CODE=$?
+# Execute restart in background, completely detached from parent process
+# This prevents deadlock when script is run from Gunicorn subprocess
+nohup /bin/systemctl restart seoaiditor &> /dev/null &
+RESTART_PID=$!
 
-# Log the result
-if [ $RESTART_EXIT_CODE -eq 0 ]; then
-    log "✓ Service restart command completed (exit code 0)"
-else
-    log "ERROR: Service restart failed (exit code $RESTART_EXIT_CODE)"
-    exit 1
-fi
+log "✓ Service restart initiated in background (PID: $RESTART_PID)"
 
-# Wait for service to stabilize
-/bin/sleep 3
+# Wait for service to restart and stabilize (increased from 3s to 6s)
+log "Waiting 6 seconds for service to restart..."
+/bin/sleep 6
 
 # Check service status (quiet mode - only checks exit code)
+log "Checking service status..."
 if /bin/systemctl is-active --quiet seoaiditor; then
     log "✓ Deployment successful! Service is running."
     log "  Deployed commit: $(/usr/bin/git log -1 --oneline)"
 else
-    log "✗ Deployment failed! Service is not running."
-    # Get status for debugging (this is safe - last operation before exit)
-    /bin/systemctl status seoaiditor &>> "$LOG_FILE"
-    exit 1
+    log "✗ WARNING: Service status check failed."
+    log "  This may be a timing issue. Checking again in 3 seconds..."
+    /bin/sleep 3
+    if /bin/systemctl is-active --quiet seoaiditor; then
+        log "✓ Service is now running (delayed start)."
+        log "  Deployed commit: $(/usr/bin/git log -1 --oneline)"
+    else
+        log "✗ Deployment failed! Service is not running after 9 seconds."
+        # Get status for debugging
+        /bin/systemctl status seoaiditor &>> "$LOG_FILE"
+        exit 1
+    fi
 fi
 
 log "======================================="
