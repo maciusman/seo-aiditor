@@ -86,34 +86,22 @@ def analyze_pagespeed_full(url):
     """
     Full PageSpeed analysis with desktop + mobile + all Lighthouse categories
     Returns comprehensive performance data for new Performance tab
+
+    TEMPORARILY DISABLED due to API key 429 issues
     """
     results = {
         'mobile': None,
         'desktop': None,
         'success': False,
-        'error': None
+        'error': 'PageSpeed tymczasowo wyłączony - sprawdź limity API key w Google Cloud Console (quota, billing, restrictions)'
     }
 
-    try:
-        # TEMPORARY: Only fetch mobile to test if desktop is causing 429
-        # Fetch mobile data (currently only performance category)
-        mobile_data = fetch_psi_data_full(url, 'mobile')
-        results['mobile'] = parse_psi_data_full(mobile_data)
-
-        # TEMPORARY: Skip desktop to avoid 429 - will re-enable after fixing category issue
-        # Rate limiting: Wait 5s between requests to respect Google's rate limits
-        # time.sleep(5)
-        # desktop_data = fetch_psi_data_full(url, 'desktop')
-        # results['desktop'] = parse_psi_data_full(desktop_data)
-
-        # For now, use mobile data for both (temporary workaround)
-        results['desktop'] = results['mobile']
-
-        results['success'] = True
-
-    except Exception as e:
-        results['error'] = str(e)
-        results['success'] = False
+    # TEMPORARY: Disable PageSpeed entirely to fix app
+    # Root cause: API key hitting 429 even with 1 category + aggressive rate limiting
+    # User needs to check Google Cloud Console:
+    # 1. APIs & Services → Credentials → Check API key restrictions
+    # 2. APIs & Services → PageSpeed Insights API → Quotas
+    # 3. Billing → Check if billing is enabled (free tier has lower limits)
 
     return results
 
