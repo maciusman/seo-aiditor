@@ -297,7 +297,7 @@
             const [showApiKeysPanel, setShowApiKeysPanel] = useState(false);
             const [apiKeys, setApiKeys] = useState({
                 gemini: localStorage.getItem('gemini_key') || sessionStorage.getItem('gemini_key') || '',
-                psi: localStorage.getItem('psi_key') || sessionStorage.getItem('psi_key') || ''
+                // psi removed
             });
             const [tempKeys, setTempKeys] = useState({ gemini: '', psi: '' });
             const [rememberKeys, setRememberKeys] = useState(localStorage.getItem('remember_keys') === 'true');
@@ -336,7 +336,7 @@
                     const requestBody = { url: url };
                     if (isProduction) {
                         requestBody.gemini_key = apiKeys.gemini;
-                        requestBody.psi_key = apiKeys.psi;
+                        // psi_key removed
                     }
 
                     // Fetch with streaming response
@@ -566,44 +566,6 @@
                                             </a>
                                         </div>
 
-                                        {/* PSI API Key (Optional) */}
-                                        <div style={{marginBottom: '16px'}}>
-                                            <label style={{display: 'block', color: '#374151', fontWeight: '600', fontSize: '14px', marginBottom: '6px'}}>
-                                                ⚡ PageSpeed Insights API Key <span style={{color: '#9ca3af', fontWeight: 'normal'}}>(optional)</span>
-                                            </label>
-                                            <div style={{display: 'flex', gap: '8px'}}>
-                                                <input
-                                                    type={showKeysInput.psi ? 'text' : 'password'}
-                                                    value={tempKeys.psi || apiKeys.psi}
-                                                    onChange={(e) => setTempKeys({...tempKeys, psi: e.target.value})}
-                                                    placeholder="AIzaSy... (optional)"
-                                                    style={{
-                                                        flex: 1,
-                                                        padding: '10px 12px',
-                                                        border: '1px solid #d1d5db',
-                                                        borderRadius: '6px',
-                                                        fontSize: '14px',
-                                                        background: '#fff'
-                                                    }}
-                                                />
-                                                <button
-                                                    onClick={() => setShowKeysInput({...showKeysInput, psi: !showKeysInput.psi})}
-                                                    style={{
-                                                        padding: '10px 16px',
-                                                        background: '#f3f4f6',
-                                                        border: '1px solid #d1d5db',
-                                                        borderRadius: '6px',
-                                                        cursor: 'pointer',
-                                                        fontSize: '16px'
-                                                    }}
-                                                >
-                                                    {showKeysInput.psi ? '🙈' : '👁️'}
-                                                </button>
-                                            </div>
-                                            <a href="https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com" target="_blank" style={{color: '#3b82f6', fontSize: '12px', marginTop: '4px', display: 'inline-block'}}>
-                                                → Get free key (optional)
-                                            </a>
-                                        </div>
 
                                         {/* Remember checkbox */}
                                         <label style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer'}}>
@@ -622,7 +584,6 @@
                                         <button
                                             onClick={() => {
                                                 const newGemini = tempKeys.gemini || apiKeys.gemini;
-                                                const newPsi = tempKeys.psi || apiKeys.psi;
 
                                                 if (!newGemini || newGemini.trim() === '') {
                                                     alert('Gemini API key is required!');
@@ -632,7 +593,6 @@
                                                 // Save keys
                                                 const storage = rememberKeys ? localStorage : sessionStorage;
                                                 storage.setItem('gemini_key', newGemini);
-                                                storage.setItem('psi_key', newPsi);
                                                 if (rememberKeys) {
                                                     localStorage.setItem('remember_keys', 'true');
                                                 }
