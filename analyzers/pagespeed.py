@@ -4,7 +4,15 @@ import time
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import GOOGLE_PSI_API_KEY, PSI_TIMEOUT
+from config import PSI_TIMEOUT  # Only timeout from config
+
+def get_psi_api_key():
+    """
+    Get PSI API key dynamically from environment (supports runtime updates).
+    This allows app.py to set os.environ['GOOGLE_PSI_API_KEY'] per-request
+    without Python import cache issues.
+    """
+    return os.getenv('GOOGLE_PSI_API_KEY', '')
 
 def analyze_pagespeed(url):
     """Analiza Core Web Vitals via Google PageSpeed Insights API"""
@@ -84,24 +92,35 @@ def analyze_pagespeed(url):
 
 def analyze_pagespeed_full(url):
     """
-    Full PageSpeed analysis with desktop + mobile + all Lighthouse categories
+    Full PageSpeed analysis with desktop + mobile
     Returns comprehensive performance data for new Performance tab
 
-    TEMPORARILY DISABLED due to API key 429 issues
+    NOTE: Currently fetches only 'performance' category (not all 4) to avoid rate limiting
     """
     results = {
         'mobile': None,
         'desktop': None,
         'success': False,
-        'error': 'PageSpeed tymczasowo wyłączony - sprawdź limity API key w Google Cloud Console (quota, billing, restrictions)'
+        'error': None
     }
 
-    # TEMPORARY: Disable PageSpeed entirely to fix app
-    # Root cause: API key hitting 429 even with 1 category + aggressive rate limiting
-    # User needs to check Google Cloud Console:
-    # 1. APIs & Services → Credentials → Check API key restrictions
-    # 2. APIs & Services → PageSpeed Insights API → Quotas
-    # 3. Billing → Check if billing is enabled (free tier has lower limits)
+    try:
+        # Fetch mobile data (performance category only)
+        mobile_data = fetch_psi_data_full(url, 'mobile')
+        results['mobile'] = parse_psi_data_full(mobile_data)
+
+        # Rate limiting: Wait 5s between requests to respect Google's rate limits
+        time.sleep(5)
+
+        # Fetch desktop data (performance category only)
+        desktop_data = fetch_psi_data_full(url, 'desktop')
+        results['desktop'] = parse_psi_data_full(desktop_data)
+
+        results['success'] = True
+
+    except Exception as e:
+        results['error'] = str(e)
+        results['success'] = False
 
     return results
 
@@ -115,9 +134,10 @@ def fetch_psi_data(url, strategy='mobile'):
         'category': 'performance'
     }
 
-    # Dodaj API key tylko jeśli jest ustawiony
-    if GOOGLE_PSI_API_KEY and GOOGLE_PSI_API_KEY != "YOUR_API_KEY_HERE":
-        params['key'] = GOOGLE_PSI_API_KEY
+    # Dodaj API key tylko jeśli jest ustawiony (get dynamically from environment)
+    api_key = get_psi_api_key()
+    if api_key and api_key != "YOUR_API_KEY_HERE":
+        params['key'] = api_key
 
     # Pre-emptive delay before request (helps with rate limiting)
     time.sleep(1)
@@ -154,9 +174,10 @@ def fetch_psi_data_full(url, strategy='mobile'):
         'category': 'performance'  # Was: ['performance', 'accessibility', 'best-practices', 'seo']
     }
 
-    # Dodaj API key tylko jeśli jest ustawiony
-    if GOOGLE_PSI_API_KEY and GOOGLE_PSI_API_KEY != "YOUR_API_KEY_HERE":
-        params['key'] = GOOGLE_PSI_API_KEY
+    # Dodaj API key tylko jeśli jest ustawiony (get dynamically from environment)
+    api_key = get_psi_api_key()
+    if api_key and api_key != "YOUR_API_KEY_HERE":
+        params['key'] = api_key
 
     # Pre-emptive delay before request (helps with rate limiting)
     time.sleep(1)
