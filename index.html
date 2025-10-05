@@ -299,9 +299,9 @@
                 gemini: localStorage.getItem('gemini_key') || sessionStorage.getItem('gemini_key') || '',
                 // psi removed
             });
-            const [tempKeys, setTempKeys] = useState({ gemini: '', psi: '' });
+            const [tempKeys, setTempKeys] = useState({ gemini: '' });
             const [rememberKeys, setRememberKeys] = useState(localStorage.getItem('remember_keys') === 'true');
-            const [showKeysInput, setShowKeysInput] = useState({ gemini: false, psi: false });
+            const [showKeysInput, setShowKeysInput] = useState({ gemini: false });
 
             // Auto-expand panel if in production and no keys saved
             useEffect(() => {
@@ -598,8 +598,8 @@
                                                 }
 
                                                 // Update state
-                                                setApiKeys({ gemini: newGemini, psi: newPsi });
-                                                setTempKeys({ gemini: '', psi: '' });
+                                                setApiKeys({ gemini: newGemini });
+                                                setTempKeys({ gemini: '' });
                                                 setShowApiKeysPanel(false);
                                             }}
                                             style={{
