@@ -732,9 +732,9 @@
             const tabs = isMultiPage ? [
                 { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
                 { id: 'pages', label: 'Strony', icon: '📄', badge: results.pages_analyzed },
+                { id: 'advanced_seo', label: 'Advanced SEO', icon: '🚀', badge: results.homepage?.categories?.advanced_seo ? '2025' : null },
                 { id: 'templates', label: 'Szablony', icon: '🎨', badge: results.site_wide_analysis?.template_insights?.length || 0 },
                 { id: 'issues', label: 'Problemy', icon: '⚠️', badge: (results.homepage?.all_issues?.length || 0) + (results.site_wide_analysis?.cross_page_issues?.length || 0) },
-                { id: 'performance', label: 'Performance', icon: '⚡', badge: null },
                 { id: 'strategy', label: 'Strategia', icon: '🎯', badge: null }
             ] : [
                 { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
@@ -769,9 +769,9 @@
                             <>
                                 {activeTab === 'overview' && <OverviewTabMulti results={results} exportCSV={exportCSV} exportJSON={exportJSON} exportHTML={exportHTML} />}
                                 {activeTab === 'pages' && <PagesTabMulti results={results} allPages={allPages} selectedPageId={selectedPageId} setSelectedPageId={setSelectedPageId} />}
+                                {activeTab === 'advanced_seo' && <AdvancedSEOTab results={results} />}
                                 {activeTab === 'templates' && <TemplatesTab results={results} />}
                                 {activeTab === 'issues' && <IssuesTabMulti results={results} />}
-                                {activeTab === 'performance' && <PerformanceTab results={results} />}
                                 {activeTab === 'strategy' && <StrategyTab results={results} />}
                             </>
                         ) : (
@@ -1689,7 +1689,10 @@
 
         // Advanced SEO Tab (2025) - SERP, Intent, E-E-A-T, Semantic, Readability
         function AdvancedSEOTab({ results }) {
-            const advancedSeo = results.categories?.advanced_seo || {};
+            // Support both single-page and multi-page audit structures
+            const advancedSeo = results.homepage?.categories?.advanced_seo  // Multi-page: results.homepage.categories.advanced_seo
+                             || results.categories?.advanced_seo           // Single-page: results.categories.advanced_seo
+                             || {};
             const [expandedSection, setExpandedSection] = useState(null);
 
             if (!advancedSeo.score) {
