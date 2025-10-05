@@ -13,23 +13,44 @@
 
         body {
             font-family: 'Inter', sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
         }
 
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        /* Logo */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-img {
+            height: 50px;
+            width: auto;
+        }
+
+        @media (max-width: 640px) {
+            .logo-img {
+                height: 40px;
+            }
         }
 
         /* Tab Navigation */
         .tab-nav {
             display: flex;
-            border-bottom: 2px solid #e5e7eb;
+            border-bottom: 2px solid #2a2a2a;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            background: white;
+            background: #1a1a1a;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .tab-nav::-webkit-scrollbar {
@@ -37,14 +58,14 @@
         }
 
         .tab-nav::-webkit-scrollbar-thumb {
-            background: #9ca3af;
+            background: #4b5563;
             border-radius: 2px;
         }
 
         .tab-button {
             padding: 1rem 1.5rem;
             font-weight: 500;
-            color: #6b7280;
+            color: #9ca3af;
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
             white-space: nowrap;
@@ -59,14 +80,14 @@
         }
 
         .tab-button:hover {
-            color: #4f46e5;
-            background: #f9fafb;
+            color: #f97316;
+            background: #242424;
         }
 
         .tab-button.active {
-            color: #4f46e5;
-            border-bottom-color: #4f46e5;
-            background: #f9fafb;
+            color: #f97316;
+            border-bottom-color: #f97316;
+            background: #242424;
         }
 
         .tab-badge {
@@ -77,8 +98,8 @@
             font-size: 0.75rem;
             font-weight: 600;
             border-radius: 9999px;
-            background: #e0e7ff;
-            color: #4f46e5;
+            background: #374151;
+            color: #f97316;
         }
 
         /* Mobile responsive */
@@ -86,7 +107,9 @@
             display: block;
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #d1d5db;
+            border: 1px solid #374151;
+            background: #1a1a1a;
+            color: #e0e0e0;
             border-radius: 0.5rem;
             margin-bottom: 1rem;
         }
@@ -129,8 +152,8 @@
 
         /* Badges */
         .badge-critical {
-            background-color: #FEE2E2;
-            color: #991B1B;
+            background-color: #991b1b;
+            color: #fca5a5;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -138,8 +161,8 @@
         }
 
         .badge-important {
-            background-color: #FEF3C7;
-            color: #92400E;
+            background-color: #c2410c;
+            color: #fed7aa;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -147,8 +170,8 @@
         }
 
         .badge-recommendation {
-            background-color: #DBEAFE;
-            color: #1E40AF;
+            background-color: #0c4a6e;
+            color: #7dd3fc;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -173,7 +196,7 @@
         }
 
         .collapsible-header:hover {
-            background-color: #f9fafb;
+            background-color: #242424;
         }
 
         /* Timeline */
@@ -190,7 +213,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: #e5e7eb;
+            background: #374151;
         }
 
         .timeline-item:last-child::before {
@@ -204,17 +227,60 @@
             width: 1.25rem;
             height: 1.25rem;
             border-radius: 50%;
-            border: 3px solid white;
+            border: 3px solid #1a1a1a;
             box-shadow: 0 0 0 2px currentColor;
         }
+
+        /* Override Tailwind for dark theme */
+        .bg-white { background: #1a1a1a !important; }
+        .text-gray-700 { color: #d1d5db !important; }
+        .text-gray-600 { color: #9ca3af !important; }
+        .text-gray-500 { color: #6b7280 !important; }
+        .text-gray-800 { color: #e5e7eb !important; }
+        .text-gray-900 { color: #f3f4f6 !important; }
+        .border-gray-300 { border-color: #374151 !important; }
+        .border-gray-200 { border-color: #2a2a2a !important; }
+        .bg-gray-50 { background: #242424 !important; }
+        .bg-gray-100 { background: #2a2a2a !important; }
+        .bg-blue-50 { background: #1e3a5f !important; }
+        .bg-blue-100 { background: #1e40af !important; }
+        .bg-green-50 { background: #14532d !important; }
+        .bg-green-100 { background: #166534 !important; }
+        .bg-red-50 { background: #7f1d1d !important; }
+        .bg-red-100 { background: #991b1b !important; }
+        .bg-purple-50 { background: rgba(168, 85, 247, 0.15) !important; }
+        .bg-purple-100 { background: rgba(168, 85, 247, 0.2) !important; }
+        .bg-orange-50 { background: rgba(249, 115, 22, 0.15) !important; }
+        .bg-yellow-50 { background: rgba(245, 158, 11, 0.15) !important; }
+        .bg-pink-100 { background: rgba(236, 72, 153, 0.2) !important; }
+        .bg-indigo-50 { background: rgba(99, 102, 241, 0.15) !important; }
+        .border-purple-200 { border-color: #6b21a8 !important; }
+        .border-blue-200 { border-color: #1e40af !important; }
+        .border-green-200 { border-color: #166534 !important; }
+        .border-red-200 { border-color: #991b1b !important; }
+        .border-orange-200 { border-color: #9a3412 !important; }
+        .text-purple-900 { color: #c084fc !important; }
+        .text-red-900 { color: #fca5a5 !important; }
+        .text-orange-900 { color: #fed7aa !important; }
+        .text-blue-900 { color: #93c5fd !important; }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body style="background: #0f0f0f;">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // Helper function: Auto-detect API URL based on environment
+        function getApiUrl(endpoint) {
+            const isLocal = window.location.hostname === 'localhost' ||
+                            window.location.hostname === '127.0.0.1';
+            return isLocal ? `http://localhost:5000${endpoint}` : endpoint;
+        }
+
+        // API Keys Modal Component
         function App() {
             const [url, setUrl] = useState('');
             const [loading, setLoading] = useState(false);
@@ -223,9 +289,37 @@
             const [currentStep, setCurrentStep] = useState('');
             const [error, setError] = useState(null);
 
+            // API Keys state (production mode)
+            // Detect if we're in production (not localhost)
+            const isProduction = window.location.hostname !== 'localhost' &&
+                                window.location.hostname !== '127.0.0.1';
+
+            const [showApiKeysPanel, setShowApiKeysPanel] = useState(false);
+            const [apiKeys, setApiKeys] = useState({
+                gemini: localStorage.getItem('gemini_key') || sessionStorage.getItem('gemini_key') || '',
+                // psi removed
+            });
+            const [tempKeys, setTempKeys] = useState({ gemini: '', psi: '' });
+            const [rememberKeys, setRememberKeys] = useState(localStorage.getItem('remember_keys') === 'true');
+            const [showKeysInput, setShowKeysInput] = useState({ gemini: false, psi: false });
+
+            // Auto-expand panel if in production and no keys saved
+            useEffect(() => {
+                if (isProduction && !apiKeys.gemini) {
+                    setShowApiKeysPanel(true);
+                }
+            }, []);
+
             const runAudit = async () => {
                 if (!url) {
                     alert('Proszę wprowadzić URL');
+                    return;
+                }
+
+                // Check if API keys are required and available
+                if (isProduction && !apiKeys.gemini) {
+                    setShowApiKeysPanel(true);
+                    alert('Please configure your Google Gemini API key first');
                     return;
                 }
 
@@ -233,53 +327,80 @@
                 setProgress(0);
                 setError(null);
                 setAuditResults(null);
+                setCurrentStep('Initializing audit...');
 
                 try {
-                    const progressSteps = [
-                        'Pobieranie strony głównej...',
-                        'Analiza techniczna...',
-                        'Analiza on-page SEO...',
-                        'Sprawdzanie indeksowania...',
-                        'Analiza treści...',
-                        'PageSpeed Insights...',
-                        'AI: Analiza jakości treści...',
-                        'AI: Wykrywanie typu witryny...',
-                        'AI: Wybór reprezentatywnych stron...',
-                        'Pobieranie dodatkowych stron...',
-                        'AI: Holistyczna analiza...',
-                        'Generowanie rekomendacji...'
-                    ];
+                    const API_URL = getApiUrl('/api/audit-stream');
 
-                    let stepIndex = 0;
-                    const progressInterval = setInterval(() => {
-                        if (stepIndex < progressSteps.length) {
-                            setCurrentStep(progressSteps[stepIndex]);
-                            setProgress(Math.min((stepIndex / progressSteps.length) * 90, 90));
-                            stepIndex++;
-                        }
-                    }, 4000);
+                    // Build request body
+                    const requestBody = { url: url };
+                    if (isProduction) {
+                        requestBody.gemini_key = apiKeys.gemini;
+                        // psi_key removed
+                    }
 
-                    const API_URL = 'http://localhost:5000/api/audit';
+                    // Fetch with streaming response
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ url: url })
+                        body: JSON.stringify(requestBody)
                     });
 
-                    clearInterval(progressInterval);
-
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Błąd podczas audytu');
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
 
-                    const results = await response.json();
+                    // Read streaming response (SSE format)
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
 
-                    setProgress(100);
-                    setCurrentStep('Audyt ukończony!');
-                    setAuditResults(results);
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (done) break;
+
+                        // Decode chunk and add to buffer
+                        buffer += decoder.decode(value, { stream: true });
+
+                        // Process complete SSE messages (ending with \n\n)
+                        let newlineIndex;
+                        while ((newlineIndex = buffer.indexOf('\n\n')) !== -1) {
+                            const message = buffer.slice(0, newlineIndex);
+                            buffer = buffer.slice(newlineIndex + 2);
+
+                            // Skip keepalive messages (start with ":")
+                            if (message.startsWith(':')) continue;
+
+                            // Parse SSE message (format: "data: {...}")
+                            if (message.startsWith('data: ')) {
+                                try {
+                                    const jsonStr = message.slice(6); // Remove "data: " prefix
+                                    const event = JSON.parse(jsonStr);
+
+                                    console.log('SSE Event:', event);
+
+                                    if (event.type === 'progress') {
+                                        // Update real-time progress
+                                        setProgress(event.percent);
+                                        setCurrentStep(event.message);
+                                    } else if (event.type === 'complete') {
+                                        // Audit finished - display results
+                                        setProgress(100);
+                                        setCurrentStep('Audit complete!');
+                                        setAuditResults(event.results);
+                                    } else if (event.type === 'error') {
+                                        // Error occurred
+                                        throw new Error(event.message);
+                                    }
+                                } catch (parseErr) {
+                                    console.error('Failed to parse SSE event:', message, parseErr);
+                                }
+                            }
+                        }
+                    }
 
                 } catch (err) {
                     setError(err.message);
@@ -313,15 +434,194 @@
                 document.body.removeChild(link);
             };
 
+            const exportToHTML = async () => {
+                if (!auditResults) return;
+
+                try {
+                    const response = await fetch(getApiUrl('/api/export/html'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ results: auditResults })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Export failed');
+                    }
+
+                    // Get blob and create download link
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `seo-audit-${Date.now()}.html`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                } catch (error) {
+                    alert('Błąd podczas eksportu HTML: ' + error.message);
+                }
+            };
+
             return (
                 <div className="min-h-screen">
                     {/* Header */}
-                    <header className="gradient-bg text-white py-6 px-4 shadow-lg">
+                    <header className="gradient-bg text-white py-4 px-4 shadow-lg">
                         <div className="max-w-7xl mx-auto">
-                            <h1 className="text-2xl md:text-3xl font-bold">SEO AIditor</h1>
-                            <p className="text-blue-100 text-sm">Multi-Page Intelligence × AI-Powered Insights</p>
+                            <div className="logo-container">
+                                <img src="logo.png" alt="SEO AIditor" className="logo-img" />
+                                <div>
+                                    <h1 className="text-xl md:text-2xl font-bold" style={{color: '#f3f4f6'}}>SEO AIditor</h1>
+                                    <p className="text-xs md:text-sm" style={{color: '#9ca3af'}}>Multi-Page Intelligence × AI-Powered Insights</p>
+                                </div>
+                            </div>
                         </div>
                     </header>
+
+                    {/* API Keys Configuration Panel (Production Only) */}
+                    {isProduction && (
+                        <div className="max-w-7xl mx-auto px-4 py-4">
+                            <div style={{
+                                background: apiKeys.gemini ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' : 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                                border: apiKeys.gemini ? '2px solid #10b981' : '2px solid #f59e0b',
+                                borderRadius: '12px',
+                                padding: '20px',
+                                boxShadow: apiKeys.gemini ? '0 4px 6px rgba(16, 185, 129, 0.2)' : '0 4px 6px rgba(245, 158, 11, 0.2)'
+                            }}>
+                                <div style={{display: 'flex', alignItems: 'start', justifyContent: 'space-between', gap: '16px'}}>
+                                    <div style={{display: 'flex', alignItems: 'start', gap: '16px', flex: 1}}>
+                                        <div style={{fontSize: '32px', flexShrink: 0}}>🔑</div>
+                                        <div style={{flex: 1}}>
+                                            <h3 style={{color: apiKeys.gemini ? '#065f46' : '#92400e', fontWeight: '700', fontSize: '18px', marginBottom: '8px'}}>
+                                                {apiKeys.gemini ? 'API Keys Configured ✓' : 'API Keys Required'}
+                                            </h3>
+                                            {!apiKeys.gemini && (
+                                                <p style={{color: '#78350f', fontSize: '14px', lineHeight: '1.6', marginBottom: '12px'}}>
+                                                    SEO AIditor requires your own Google API keys. Keys are <strong>free</strong> and take 2 minutes to get.
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowApiKeysPanel(!showApiKeysPanel)}
+                                        style={{
+                                            background: apiKeys.gemini ? '#10b981' : '#f59e0b',
+                                            color: '#fff',
+                                            padding: '8px 16px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            fontWeight: '600',
+                                            fontSize: '14px',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                            transition: 'all 0.2s',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {showApiKeysPanel ? '▲ Hide' : (apiKeys.gemini ? '▼ Edit Keys' : '▼ Configure')}
+                                    </button>
+                                </div>
+
+                                {/* Expandable Form */}
+                                {showApiKeysPanel && (
+                                    <div style={{marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(0,0,0,0.1)'}}>
+                                        {/* Gemini API Key */}
+                                        <div style={{marginBottom: '16px'}}>
+                                            <label style={{display: 'block', color: '#374151', fontWeight: '600', fontSize: '14px', marginBottom: '6px'}}>
+                                                🤖 Google Gemini API Key <span style={{color: '#ef4444'}}>*</span>
+                                            </label>
+                                            <div style={{display: 'flex', gap: '8px'}}>
+                                                <input
+                                                    type={showKeysInput.gemini ? 'text' : 'password'}
+                                                    value={tempKeys.gemini || apiKeys.gemini}
+                                                    onChange={(e) => setTempKeys({...tempKeys, gemini: e.target.value})}
+                                                    placeholder="AIzaSy..."
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: '10px 12px',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '6px',
+                                                        fontSize: '14px',
+                                                        background: '#fff'
+                                                    }}
+                                                />
+                                                <button
+                                                    onClick={() => setShowKeysInput({...showKeysInput, gemini: !showKeysInput.gemini})}
+                                                    style={{
+                                                        padding: '10px 16px',
+                                                        background: '#f3f4f6',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '16px'
+                                                    }}
+                                                >
+                                                    {showKeysInput.gemini ? '🙈' : '👁️'}
+                                                </button>
+                                            </div>
+                                            <a href="https://aistudio.google.com/apikey" target="_blank" style={{color: '#3b82f6', fontSize: '12px', marginTop: '4px', display: 'inline-block'}}>
+                                                → Get free key (2 min)
+                                            </a>
+                                        </div>
+
+
+                                        {/* Remember checkbox */}
+                                        <label style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer'}}>
+                                            <input
+                                                type="checkbox"
+                                                checked={rememberKeys}
+                                                onChange={(e) => setRememberKeys(e.target.checked)}
+                                                style={{width: '16px', height: '16px', cursor: 'pointer'}}
+                                            />
+                                            <span style={{fontSize: '14px', color: '#374151'}}>
+                                                Remember keys (saved in browser storage)
+                                            </span>
+                                        </label>
+
+                                        {/* Save button */}
+                                        <button
+                                            onClick={() => {
+                                                const newGemini = tempKeys.gemini || apiKeys.gemini;
+
+                                                if (!newGemini || newGemini.trim() === '') {
+                                                    alert('Gemini API key is required!');
+                                                    return;
+                                                }
+
+                                                // Save keys
+                                                const storage = rememberKeys ? localStorage : sessionStorage;
+                                                storage.setItem('gemini_key', newGemini);
+                                                if (rememberKeys) {
+                                                    localStorage.setItem('remember_keys', 'true');
+                                                }
+
+                                                // Update state
+                                                setApiKeys({ gemini: newGemini, psi: newPsi });
+                                                setTempKeys({ gemini: '', psi: '' });
+                                                setShowApiKeysPanel(false);
+                                            }}
+                                            style={{
+                                                background: '#10b981',
+                                                color: '#fff',
+                                                padding: '12px 24px',
+                                                borderRadius: '8px',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                fontWeight: '600',
+                                                fontSize: '14px',
+                                                width: '100%',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                            }}
+                                        >
+                                            💾 Save & Continue
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* URL Input */}
                     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -335,18 +635,25 @@
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
                                     placeholder="https://example.com"
-                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg"
+                                    style={{background: '#1a1a1a', color: '#e0e0e0', borderColor: '#374151'}}
                                     disabled={loading}
                                     onKeyPress={(e) => e.key === 'Enter' && runAudit()}
+                                    onFocus={(e) => e.target.style.outline = '2px solid #f97316'}
+                                    onBlur={(e) => e.target.style.outline = 'none'}
                                 />
                                 <button
                                     onClick={runAudit}
                                     disabled={loading}
-                                    className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md"
+                                    className="px-8 py-3 text-white rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md"
+                                    style={{background: loading ? '#6b7280' : '#f97316'}}
+                                    onMouseEnter={(e) => !loading && (e.target.style.background = '#ea580c')}
+                                    onMouseLeave={(e) => !loading && (e.target.style.background = '#f97316')}
                                 >
                                     {loading ? 'Analizuję...' : 'Uruchom audyt'}
                                 </button>
                             </div>
+
                         </div>
 
                         {/* Loading State */}
@@ -383,21 +690,24 @@
                                 results={auditResults}
                                 exportCSV={exportToCSV}
                                 exportJSON={exportToJSON}
+                                exportHTML={exportToHTML}
                                 onNewAudit={() => setAuditResults(null)}
                             />
                         )}
                     </div>
 
                     {/* Footer */}
-                    <footer className="mt-12 py-6 text-center text-gray-500 text-sm border-t">
-                        <p>SEO AIditor &copy; 2025 | Powered by Gemini 2.5 Flash AI</p>
+                    <footer className="mt-12 py-6 text-center text-sm" style={{borderTop: '1px solid #2a2a2a'}}>
+                        <p style={{color: '#9ca3af'}}>
+                            Generated by <strong style={{color: '#f97316'}}>SEO AIditor</strong> &copy; 2025 | Powered by Gemini 2.5 Flash AI
+                        </p>
                     </footer>
                 </div>
             );
         }
 
         // Main Results Component
-        function AuditResults({ results, exportCSV, exportJSON, onNewAudit }) {
+        function AuditResults({ results, exportCSV, exportJSON, exportHTML, onNewAudit }) {
             const [activeTab, setActiveTab] = useState('overview');
             const [selectedPageId, setSelectedPageId] = useState('homepage');
 
@@ -424,6 +734,7 @@
                 { id: 'pages', label: 'Strony', icon: '📄', badge: results.pages_analyzed },
                 { id: 'templates', label: 'Szablony', icon: '🎨', badge: results.site_wide_analysis?.template_insights?.length || 0 },
                 { id: 'issues', label: 'Problemy', icon: '⚠️', badge: (results.homepage?.all_issues?.length || 0) + (results.site_wide_analysis?.cross_page_issues?.length || 0) },
+                { id: 'performance', label: 'Performance', icon: '⚡', badge: null },
                 { id: 'strategy', label: 'Strategia', icon: '🎯', badge: null }
             ] : [
                 { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
@@ -456,15 +767,16 @@
                     <div className="mt-6">
                         {isMultiPage ? (
                             <>
-                                {activeTab === 'overview' && <OverviewTabMulti results={results} exportCSV={exportCSV} exportJSON={exportJSON} />}
+                                {activeTab === 'overview' && <OverviewTabMulti results={results} exportCSV={exportCSV} exportJSON={exportJSON} exportHTML={exportHTML} />}
                                 {activeTab === 'pages' && <PagesTabMulti results={results} allPages={allPages} selectedPageId={selectedPageId} setSelectedPageId={setSelectedPageId} />}
                                 {activeTab === 'templates' && <TemplatesTab results={results} />}
                                 {activeTab === 'issues' && <IssuesTabMulti results={results} />}
+                                {activeTab === 'performance' && <PerformanceTab results={results} />}
                                 {activeTab === 'strategy' && <StrategyTab results={results} />}
                             </>
                         ) : (
                             <>
-                                {activeTab === 'overview' && <OverviewTabSingle results={results} exportCSV={exportCSV} exportJSON={exportJSON} />}
+                                {activeTab === 'overview' && <OverviewTabSingle results={results} exportCSV={exportCSV} exportJSON={exportJSON} exportHTML={exportHTML} />}
                                 {activeTab === 'categories' && <CategoriesTab results={results} />}
                                 {activeTab === 'advanced_seo' && <AdvancedSEOTab results={results} />}
                                 {activeTab === 'issues' && <IssuesTabSingle results={results} />}
@@ -502,15 +814,15 @@
 
         // MULTI-PAGE TAB COMPONENTS
 
-        function OverviewTabMulti({ results, exportCSV, exportJSON }) {
+        function OverviewTabMulti({ results, exportCSV, exportJSON, exportHTML }) {
             const siteWide = results.site_wide_analysis || {};
 
             return (
                 <div className="space-y-6">
                     {/* Executive Summary */}
-                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200">
+                    <div className="bg-white rounded-lg p-6 border border-purple-200">
                         <h3 className="text-xl font-bold text-purple-900 mb-3">📝 Podsumowanie wykonawcze</h3>
-                        <p className="text-gray-800 leading-relaxed">
+                        <p className="text-gray-700 leading-relaxed">
                             {siteWide.executive_summary || 'Multi-page analysis wykonana pomyślnie. Przeanalizowano ' + results.pages_analyzed + ' stron witryny ' + results.site_type + '.'}
                         </p>
                     </div>
@@ -574,13 +886,25 @@
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <h3 className="text-lg font-bold mb-4">📥 Eksport wyników</h3>
                         <div className="flex flex-wrap gap-3">
-                            <button onClick={exportJSON} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md">
+                            <button onClick={exportHTML} className="px-6 py-3 text-white rounded-lg transition shadow-md" style={{background: '#f97316'}}
+                                onMouseEnter={(e) => e.target.style.background = '#ea580c'}
+                                onMouseLeave={(e) => e.target.style.background = '#f97316'}>
+                                🌐 Eksport HTML (Interaktywny)
+                            </button>
+                            <button onClick={exportJSON} className="px-6 py-3 text-white rounded-lg transition shadow-md" style={{background: '#1e40af'}}
+                                onMouseEnter={(e) => e.target.style.background = '#1e3a8a'}
+                                onMouseLeave={(e) => e.target.style.background = '#1e40af'}>
                                 📄 Eksport JSON
                             </button>
-                            <button onClick={exportCSV} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-md">
+                            <button onClick={exportCSV} className="px-6 py-3 text-white rounded-lg transition shadow-md" style={{background: '#166534'}}
+                                onMouseEnter={(e) => e.target.style.background = '#14532d'}
+                                onMouseLeave={(e) => e.target.style.background = '#166534'}>
                                 📊 Eksport CSV
                             </button>
                         </div>
+                        <p className="text-sm text-gray-500 mt-3">
+                            💡 <strong>HTML:</strong> Pełny raport z zakładkami - działa offline, można wysłać klientowi
+                        </p>
                     </div>
                 </div>
             );
@@ -612,14 +936,33 @@
                                     <button
                                         key={page.id}
                                         onClick={() => setSelectedPageId(page.id)}
-                                        className={`w-full text-left px-4 py-3 rounded-lg transition ${
+                                        className={`w-full text-left px-4 py-3 rounded-lg transition border-l-4 ${
                                             selectedPageId === page.id
-                                                ? 'bg-purple-100 text-purple-900 font-semibold border-l-4 border-purple-500'
-                                                : 'hover:bg-gray-100 border-l-4 border-transparent'
+                                                ? 'bg-purple-100 text-purple-900 font-semibold border-purple-500'
+                                                : 'border-transparent'
                                         }`}
+                                        style={selectedPageId !== page.id ? {
+                                            color: '#9ca3af'
+                                        } : {}}
+                                        onMouseEnter={(e) => {
+                                            if (selectedPageId !== page.id) {
+                                                e.currentTarget.style.background = '#2a2a2a';
+                                                e.currentTarget.style.color = '#e5e7eb';
+                                                const urlDiv = e.currentTarget.querySelector('.url-text');
+                                                if (urlDiv) urlDiv.style.color = '#9ca3af';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (selectedPageId !== page.id) {
+                                                e.currentTarget.style.background = 'transparent';
+                                                e.currentTarget.style.color = '#9ca3af';
+                                                const urlDiv = e.currentTarget.querySelector('.url-text');
+                                                if (urlDiv) urlDiv.style.color = '#6b7280';
+                                            }
+                                        }}
                                     >
                                         <div className="font-medium">{page.label}</div>
-                                        <div className="text-xs text-gray-500 mt-1 truncate">{formatUrl(page.url)}</div>
+                                        <div className="url-text text-xs mt-1 truncate" style={{color: '#6b7280'}}>{formatUrl(page.url)}</div>
                                     </button>
                                 ))}
                             </div>
@@ -667,16 +1010,89 @@
                 );
             }
 
+            // Build page types coverage table
+            const analyzedPages = [
+                { page_type: 'homepage', url: results.url, label: '🏠 Strona główna' },
+                ...(results.additional_pages || [])
+            ];
+
+            // Map template insights to page types for coverage
+            const pageTypesWithInsights = new Set(
+                templateInsights
+                    .map(t => t.page_type || t.template_name)
+                    .filter(Boolean)
+            );
+
             return (
                 <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg p-6">
-                        <h3 className="text-xl font-bold mb-2">🎨 Analiza szablonów</h3>
+                    <div className="bg-white rounded-lg p-6 border border-purple-200">
+                        <h3 className="text-xl font-bold mb-2 text-purple-900">🎨 Analiza szablonów</h3>
                         <p className="text-gray-700">
                             Problemy wykryte na poziomie szablonów wpływają na wiele stron jednocześnie.
                             <strong> Naprawienie jednego szablonu = naprawienie dziesiątek stron!</strong>
                         </p>
                     </div>
 
+                    {/* Page Types Coverage Table */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h4 className="text-lg font-bold mb-4">📋 Pokrycie analizy</h4>
+                        <p className="text-sm text-gray-600 mb-4">Przeanalizowane typy stron:</p>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-gray-200">
+                                        <th className="text-left py-2 px-3 font-semibold">Typ strony</th>
+                                        <th className="text-left py-2 px-3 font-semibold">URL</th>
+                                        <th className="text-left py-2 px-3 font-semibold">Powód wyboru</th>
+                                        <th className="text-center py-2 px-3 font-semibold">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {analyzedPages.map((page, idx) => {
+                                        const hasInsight = pageTypesWithInsights.has(page.page_type);
+                                        return (
+                                            <tr key={idx} className="border-b border-gray-100" style={{transition: 'background 0.2s'}}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                                                <td className="py-3 px-3">
+                                                    <span className="font-medium">{page.label || page.page_type}</span>
+                                                </td>
+                                                <td className="py-3 px-3">
+                                                    <a href={page.url} target="_blank" rel="noopener noreferrer"
+                                                       className="text-blue-600 hover:text-blue-800 hover:underline text-xs">
+                                                        {page.url}
+                                                    </a>
+                                                </td>
+                                                <td className="py-3 px-3 text-gray-600 text-xs">
+                                                    {page.selection_reason || 'Strona główna - punkt wyjścia'}
+                                                </td>
+                                                <td className="py-3 px-3 text-center">
+                                                    {hasInsight ? (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold" style={{
+                                                            background: '#166534',
+                                                            color: '#bbf7d0'
+                                                        }}>
+                                                            <span style={{lineHeight: '1'}}>✓</span>
+                                                            <span>Przeanalizowano</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                            background: '#6b7280',
+                                                            color: '#e5e7eb'
+                                                        }}>
+                                                            Brak insightów
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Template Insights */}
                     {templateInsights.map((template, idx) => (
                         <div key={idx} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
                             <div className="flex justify-between items-start mb-4">
@@ -685,18 +1101,20 @@
                                     <p className="text-sm text-gray-600">Dotyczy: <strong>{template.pages_affected}</strong></p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                        template.seo_impact === 'HIGH' ? 'bg-red-100 text-red-800' :
-                                        template.seo_impact === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-green-100 text-green-800'
-                                    }`}>
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{
+                                        background: template.seo_impact === 'HIGH' ? '#991b1b' :
+                                                   template.seo_impact === 'MEDIUM' ? '#d97706' : '#166534',
+                                        color: template.seo_impact === 'HIGH' ? '#fca5a5' :
+                                               template.seo_impact === 'MEDIUM' ? '#fef3c7' : '#bbf7d0'
+                                    }}>
                                         {template.seo_impact} SEO
                                     </span>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                        template.fix_difficulty === 'EASY' ? 'bg-green-100 text-green-800' :
-                                        template.fix_difficulty === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-red-100 text-red-800'
-                                    }`}>
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{
+                                        background: template.fix_difficulty === 'EASY' ? '#166534' :
+                                                   template.fix_difficulty === 'MEDIUM' ? '#d97706' : '#991b1b',
+                                        color: template.fix_difficulty === 'EASY' ? '#bbf7d0' :
+                                               template.fix_difficulty === 'MEDIUM' ? '#fef3c7' : '#fca5a5'
+                                    }}>
                                         {template.fix_difficulty}
                                     </span>
                                 </div>
@@ -780,7 +1198,7 @@
                     {/* Filters */}
                     <div className="flex flex-col md:flex-row gap-3 mb-6 pb-6 border-b">
                         <div className="flex-1">
-                            <label className="text-sm text-gray-600 block mb-1">Sortuj według:</label>
+                            <label className="text-sm block mb-1" style={{color: '#1f2937'}}>Sortuj według:</label>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
@@ -791,7 +1209,7 @@
                             </select>
                         </div>
                         <div className="flex-1">
-                            <label className="text-sm text-gray-600 block mb-1">Filtruj według wagi:</label>
+                            <label className="text-sm block mb-1" style={{color: '#1f2937'}}>Filtruj według wagi:</label>
                             <select
                                 value={filterSeverity}
                                 onChange={(e) => setFilterSeverity(e.target.value)}
@@ -817,7 +1235,7 @@
                                             <div className="flex items-center gap-2 mb-2">
                                                 <span className={getBadgeClass(issue.severity)}>{issue.severity?.toUpperCase()}</span>
                                                 <span className="text-xs text-gray-500">Impact: {issue.impact}/10</span>
-                                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{issue.pageLabel}</span>
+                                                <span className="text-xs px-2 py-1 rounded" style={{background: '#1e40af', color: '#bfdbfe'}}>{issue.pageLabel}</span>
                                             </div>
                                             <h4 className="font-bold text-gray-800">{issue.title}</h4>
                                         </div>
@@ -848,6 +1266,243 @@
                                 </div>
                             ))
                         )}
+                    </div>
+                </div>
+            );
+        }
+
+        function PerformanceTab({ results }) {
+            // Get pagespeed_full data (works for both single-page and multi-page)
+            const perfData = results.pagespeed_full || results.homepage?.pagespeed_full;
+
+            if (!perfData || !perfData.success) {
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                        <p className="text-gray-500">
+                            {perfData?.error ? `Błąd PageSpeed: ${perfData.error}` : 'Brak danych PageSpeed. Uruchom ponownie audyt.'}
+                        </p>
+                    </div>
+                );
+            }
+
+            const mobile = perfData.mobile;
+            const desktop = perfData.desktop;
+
+            const getScoreColor = (score) => {
+                if (score >= 90) return '#10b981';
+                if (score >= 50) return '#f59e0b';
+                return '#ef4444';
+            };
+
+            const getRatingColor = (rating) => {
+                if (rating === 'good') return {bg: '#166534', text: '#bbf7d0'};
+                if (rating === 'needs-improvement') return {bg: '#d97706', text: '#fef3c7'};
+                return {bg: '#991b1b', text: '#fca5a5'};
+            };
+
+            const getRatingLabel = (rating) => {
+                if (rating === 'good') return 'Dobry';
+                if (rating === 'needs-improvement') return 'Do poprawy';
+                return 'Słaby';
+            };
+
+            return (
+                <div className="space-y-6">
+                    {/* Scores Overview */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-xl font-bold mb-4">📊 Lighthouse Scores</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {/* Mobile */}
+                            <div>
+                                <h4 className="font-bold mb-3 flex items-center gap-2">
+                                    📱 Mobile
+                                </h4>
+                                <div className="space-y-3">
+                                    {Object.entries(mobile.scores).filter(([key]) => key !== 'average').map(([category, score]) => (
+                                        <div key={category}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-sm capitalize">{category === 'best_practices' ? 'Best Practices' : category}</span>
+                                                <span className="font-bold" style={{color: getScoreColor(score)}}>{score}/100</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="h-2 rounded-full transition-all" style={{width: `${score}%`, background: getScoreColor(score)}}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Desktop */}
+                            <div>
+                                <h4 className="font-bold mb-3 flex items-center gap-2">
+                                    🖥️ Desktop
+                                </h4>
+                                <div className="space-y-3">
+                                    {Object.entries(desktop.scores).filter(([key]) => key !== 'average').map(([category, score]) => (
+                                        <div key={category}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-sm capitalize">{category === 'best_practices' ? 'Best Practices' : category}</span>
+                                                <span className="font-bold" style={{color: getScoreColor(score)}}>{score}/100</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="h-2 rounded-full transition-all" style={{width: `${score}%`, background: getScoreColor(score)}}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Core Web Vitals */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-xl font-bold mb-4">⚡ Core Web Vitals</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {/* Mobile CWV */}
+                            <div>
+                                <h4 className="font-bold mb-3">📱 Mobile</h4>
+                                <div className="space-y-4">
+                                    {/* LCP */}
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(mobile.core_web_vitals.lcp.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">LCP (Largest Contentful Paint)</div>
+                                                <div className="text-2xl font-bold mt-1">{mobile.core_web_vitals.lcp.value_s}s</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(mobile.core_web_vitals.lcp.rating).bg,
+                                                color: getRatingColor(mobile.core_web_vitals.lcp.rating).text
+                                            }}>
+                                                {getRatingLabel(mobile.core_web_vitals.lcp.rating)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600">Powinno: &lt;2.5s (dobry), &lt;4.0s (do poprawy)</div>
+                                    </div>
+
+                                    {/* FID */}
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(mobile.core_web_vitals.fid.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">FID (First Input Delay)</div>
+                                                <div className="text-2xl font-bold mt-1">{mobile.core_web_vitals.fid.value}ms</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(mobile.core_web_vitals.fid.rating).bg,
+                                                color: getRatingColor(mobile.core_web_vitals.fid.rating).text
+                                            }}>
+                                                {getRatingLabel(mobile.core_web_vitals.fid.rating)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600">Powinno: &lt;100ms (dobry), &lt;300ms (do poprawy)</div>
+                                    </div>
+
+                                    {/* CLS */}
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(mobile.core_web_vitals.cls.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">CLS (Cumulative Layout Shift)</div>
+                                                <div className="text-2xl font-bold mt-1">{mobile.core_web_vitals.cls.value.toFixed(3)}</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(mobile.core_web_vitals.cls.rating).bg,
+                                                color: getRatingColor(mobile.core_web_vitals.cls.rating).text
+                                            }}>
+                                                {getRatingLabel(mobile.core_web_vitals.cls.rating)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600">Powinno: &lt;0.1 (dobry), &lt;0.25 (do poprawy)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Desktop CWV */}
+                            <div>
+                                <h4 className="font-bold mb-3">🖥️ Desktop</h4>
+                                <div className="space-y-4">
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(desktop.core_web_vitals.lcp.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">LCP</div>
+                                                <div className="text-2xl font-bold mt-1">{desktop.core_web_vitals.lcp.value_s}s</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(desktop.core_web_vitals.lcp.rating).bg,
+                                                color: getRatingColor(desktop.core_web_vitals.lcp.rating).text
+                                            }}>
+                                                {getRatingLabel(desktop.core_web_vitals.lcp.rating)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(desktop.core_web_vitals.fid.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">FID</div>
+                                                <div className="text-2xl font-bold mt-1">{desktop.core_web_vitals.fid.value}ms</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(desktop.core_web_vitals.fid.rating).bg,
+                                                color: getRatingColor(desktop.core_web_vitals.fid.rating).text
+                                            }}>
+                                                {getRatingLabel(desktop.core_web_vitals.fid.rating)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 rounded border" style={{borderColor: getRatingColor(desktop.core_web_vitals.cls.rating).bg}}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="font-bold">CLS</div>
+                                                <div className="text-2xl font-bold mt-1">{desktop.core_web_vitals.cls.value.toFixed(3)}</div>
+                                            </div>
+                                            <span className="px-2 py-1 rounded text-xs font-semibold" style={{
+                                                background: getRatingColor(desktop.core_web_vitals.cls.rating).bg,
+                                                color: getRatingColor(desktop.core_web_vitals.cls.rating).text
+                                            }}>
+                                                {getRatingLabel(desktop.core_web_vitals.cls.rating)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Opportunities */}
+                    {mobile.opportunities && mobile.opportunities.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h3 className="text-xl font-bold mb-4">🎯 Top Optimization Opportunities (Mobile)</h3>
+                            <div className="space-y-3">
+                                {mobile.opportunities.map((opp, idx) => (
+                                    <div key={idx} className="border-l-4 border-orange-500 bg-orange-50 rounded-r p-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-bold flex-1">{opp.title}</h4>
+                                            <span className="px-3 py-1 rounded text-xs font-semibold ml-2" style={{background: '#f97316', color: '#fff'}}>
+                                                💾 ~{opp.savings_s}s
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-700" dangerouslySetInnerHTML={{__html: opp.description}}></p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Link to full PSI report */}
+                    <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                        <h3 className="text-lg font-bold mb-3">🔗 Pełny raport PageSpeed Insights</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Kliknij poniżej aby zobaczyć pełny raport z wszystkimi szczegółami technicznymi
+                        </p>
+                        <a
+                            href={mobile.psi_report_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block px-6 py-3 rounded-lg text-white font-semibold transition"
+                            style={{background: '#1e40af'}}
+                            onMouseEnter={(e) => e.target.style.background = '#1e3a8a'}
+                            onMouseLeave={(e) => e.target.style.background = '#1e40af'}
+                        >
+                            Otwórz pełny raport PageSpeed Insights ↗
+                        </a>
                     </div>
                 </div>
             );
@@ -889,12 +1544,14 @@
                                     <div key={idx} className="border-l-4 border-purple-500 bg-purple-50 rounded-r p-4">
                                         <div className="flex items-start justify-between mb-3">
                                             <h4 className="font-bold flex-1">{rec.recommendation}</h4>
-                                            <span className={`px-3 py-1 rounded text-xs font-semibold ml-2 ${
-                                                rec.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                                                rec.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-                                                rec.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-green-100 text-green-800'
-                                            }`}>
+                                            <span className="px-3 py-1 rounded text-xs font-semibold ml-2" style={{
+                                                background: rec.priority === 'CRITICAL' ? '#991b1b' :
+                                                           rec.priority === 'HIGH' ? '#c2410c' :
+                                                           rec.priority === 'MEDIUM' ? '#d97706' : '#166534',
+                                                color: rec.priority === 'CRITICAL' ? '#fca5a5' :
+                                                       rec.priority === 'HIGH' ? '#fed7aa' :
+                                                       rec.priority === 'MEDIUM' ? '#fef3c7' : '#bbf7d0'
+                                            }}>
                                                 {rec.priority}
                                             </span>
                                         </div>
@@ -975,7 +1632,7 @@
 
         // SINGLE-PAGE TAB COMPONENTS
 
-        function OverviewTabSingle({ results, exportCSV, exportJSON }) {
+        function OverviewTabSingle({ results, exportCSV, exportJSON, exportHTML }) {
             return (
                 <div className="space-y-6">
                     {/* Score Card */}
@@ -1006,13 +1663,25 @@
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <h3 className="text-lg font-bold mb-4">📥 Eksport wyników</h3>
                         <div className="flex flex-wrap gap-3">
-                            <button onClick={exportJSON} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <button onClick={exportHTML} className="px-6 py-3 text-white rounded-lg transition" style={{background: '#f97316'}}
+                                onMouseEnter={(e) => e.target.style.background = '#ea580c'}
+                                onMouseLeave={(e) => e.target.style.background = '#f97316'}>
+                                🌐 HTML (Interaktywny)
+                            </button>
+                            <button onClick={exportJSON} className="px-6 py-3 text-white rounded-lg transition" style={{background: '#1e40af'}}
+                                onMouseEnter={(e) => e.target.style.background = '#1e3a8a'}
+                                onMouseLeave={(e) => e.target.style.background = '#1e40af'}>
                                 📄 JSON
                             </button>
-                            <button onClick={exportCSV} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                            <button onClick={exportCSV} className="px-6 py-3 text-white rounded-lg transition" style={{background: '#166534'}}
+                                onMouseEnter={(e) => e.target.style.background = '#14532d'}
+                                onMouseLeave={(e) => e.target.style.background = '#166534'}>
                                 📊 CSV
                             </button>
                         </div>
+                        <p className="text-sm text-gray-500 mt-3">
+                            💡 <strong>HTML:</strong> Pełny raport - działa offline, można wysłać klientowi
+                        </p>
                     </div>
                 </div>
             );
@@ -1052,7 +1721,7 @@
                     {sections.map(section => (
                         <div key={section.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <div
-                                className="collapsible-header p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+                                className="collapsible-header p-4 flex justify-between items-center cursor-pointer"
                                 onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
                             >
                                 <div className="flex items-center gap-3 flex-1">
@@ -1066,7 +1735,7 @@
                             </div>
 
                             {expandedSection === section.id && section.insights && (
-                                <div className="p-6 border-t bg-gray-50 space-y-4">
+                                <div className="p-6 border-t space-y-4">
                                     {/* SERP Analysis */}
                                     {section.id === 'serp' && (
                                         <>
@@ -1084,7 +1753,7 @@
                                                 <div>
                                                     <h4 className="font-semibold mb-2">Top Competitors:</h4>
                                                     {section.insights.top_competitors.map((comp, idx) => (
-                                                        <div key={idx} className="bg-white p-3 rounded mb-2">
+                                                        <div key={idx} className="bg-white p-3 rounded mb-2 border border-gray-200">
                                                             <a href={comp.url} target="_blank" className="text-blue-600 hover:underline font-medium">{comp.title}</a>
                                                             <p className="text-sm text-gray-600 mt-1">Strengths: {comp.strengths?.join(', ')}</p>
                                                         </div>
@@ -1094,7 +1763,7 @@
                                             {section.insights.content_gaps && section.insights.content_gaps.length > 0 && (
                                                 <div>
                                                     <h4 className="font-semibold mb-2">Content Gaps:</h4>
-                                                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                                    <ul className="list-disc list-inside text-sm space-y-1">
                                                         {section.insights.content_gaps.map((gap, idx) => <li key={idx}>{gap}</li>)}
                                                     </ul>
                                                 </div>
@@ -1111,11 +1780,11 @@
                                     {section.id === 'intent' && (
                                         <>
                                             <div className="grid grid-cols-2 gap-4 mb-4">
-                                                <div className="bg-white p-3 rounded">
+                                                <div className="bg-white p-3 rounded border border-gray-200">
                                                     <span className="text-sm text-gray-600">Detected Intent:</span>
                                                     <p className="font-bold capitalize">{section.insights.detected_intent}</p>
                                                 </div>
-                                                <div className="bg-white p-3 rounded">
+                                                <div className="bg-white p-3 rounded border border-gray-200">
                                                     <span className="text-sm text-gray-600">Confidence:</span>
                                                     <p className="font-bold">{section.insights.intent_confidence}%</p>
                                                 </div>
@@ -1131,7 +1800,7 @@
                                             {section.insights.recommendations && section.insights.recommendations.length > 0 && (
                                                 <div>
                                                     <h4 className="font-semibold mb-2">Recommendations:</h4>
-                                                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                                    <ul className="list-disc list-inside text-sm space-y-1">
                                                         {section.insights.recommendations.map((rec, idx) => <li key={idx}>{rec}</li>)}
                                                     </ul>
                                                 </div>
@@ -1143,25 +1812,25 @@
                                     {section.id === 'eeat' && (
                                         <>
                                             <div className="grid grid-cols-4 gap-3 mb-4">
-                                                <div className="bg-white p-3 rounded text-center">
+                                                <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Experience</p>
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.experience_score)}`}>
                                                         {section.insights.experience_score}
                                                     </p>
                                                 </div>
-                                                <div className="bg-white p-3 rounded text-center">
+                                                <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Expertise</p>
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.expertise_score)}`}>
                                                         {section.insights.expertise_score}
                                                     </p>
                                                 </div>
-                                                <div className="bg-white p-3 rounded text-center">
+                                                <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Authoritativeness</p>
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.authoritativeness_score)}`}>
                                                         {section.insights.authoritativeness_score}
                                                     </p>
                                                 </div>
-                                                <div className="bg-white p-3 rounded text-center">
+                                                <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Trustworthiness</p>
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.trustworthiness_score)}`}>
                                                         {section.insights.trustworthiness_score}
@@ -1238,15 +1907,15 @@
                                     {section.id === 'readability' && (
                                         <>
                                             <div className="grid grid-cols-3 gap-3 mb-4">
-                                                <div className="bg-white p-3 rounded text-center">
+                                                <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Reading Level</p>
                                                     <p className="font-bold capitalize">{section.insights.readability_grade?.replace('_', ' ')}</p>
                                                 </div>
-                                                <div className="bg-white p-3 rounded text-center">
+                                                <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Flesch Score</p>
                                                     <p className="font-bold">{section.insights.flesch_score_estimate}</p>
                                                 </div>
-                                                <div className="bg-white p-3 rounded text-center">
+                                                <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Avg Sentence</p>
                                                     <p className="font-bold">{section.insights.avg_sentence_length} words</p>
                                                 </div>
@@ -1266,7 +1935,7 @@
                                             {section.insights.recommendations && section.insights.recommendations.length > 0 && (
                                                 <div>
                                                     <h4 className="font-semibold mb-2">Recommendations:</h4>
-                                                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                                    <ul className="list-disc list-inside text-sm space-y-1">
                                                         {section.insights.recommendations.map((rec, idx) => <li key={idx}>{rec}</li>)}
                                                     </ul>
                                                 </div>
