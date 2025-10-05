@@ -1,5 +1,7 @@
 # audit_engine.py
 import datetime
+import re
+from bs4 import BeautifulSoup
 from utils import validate_url, fetch_url
 from analyzers.technical import analyze_technical
 from analyzers.onpage import analyze_onpage
@@ -7,7 +9,56 @@ from analyzers.indexing import analyze_indexing
 from analyzers.content import analyze_content
 from analyzers.ai_content import analyze_ai_content, detect_page_language
 from analyzers.ai_action_plan import generate_ai_action_plan
+# Advanced SEO analyzers (2025)
+from analyzers.ai_serp_analysis import analyze_serp_position
+from analyzers.ai_intent_analysis import analyze_search_intent_match
+from analyzers.ai_eeat_analysis import analyze_eeat_signals
+from analyzers.ai_semantic_analysis import analyze_semantic_seo
+from analyzers.ai_readability_ux import analyze_readability_ux
 from config import WEIGHTS, ENABLE_AI_ANALYSIS, ENABLE_MULTI_PAGE_ANALYSIS, MAX_PAGES_TO_ANALYZE
+
+def extract_primary_keywords(html_content):
+    """
+    Auto-detect primary keywords from meta title + H1
+
+    Args:
+        html_content: Full HTML content
+
+    Returns:
+        list: Primary keywords (up to 5)
+    """
+    try:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        keywords = []
+
+        # Get meta title
+        title_tag = soup.find('title')
+        if title_tag:
+            title_text = title_tag.get_text(strip=True)
+            # Extract meaningful words (3+ chars, not common stop words)
+            title_words = re.findall(r'\b[a-zA-Z]{3,}\b', title_text.lower())
+            keywords.extend(title_words[:3])  # Top 3 from title
+
+        # Get H1
+        h1_tag = soup.find('h1')
+        if h1_tag:
+            h1_text = h1_tag.get_text(strip=True)
+            h1_words = re.findall(r'\b[a-zA-Z]{3,}\b', h1_text.lower())
+            keywords.extend(h1_words[:2])  # Top 2 from H1
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_keywords = []
+        for kw in keywords:
+            if kw not in seen and kw not in ['the', 'and', 'for', 'with', 'this', 'that', 'from']:
+                seen.add(kw)
+                unique_keywords.append(kw)
+
+        return unique_keywords[:5]  # Max 5 keywords
+
+    except Exception as e:
+        print(f"  Warning: Could not extract keywords: {e}")
+        return ['seo', 'website']  # Fallback
 
 def run_audit(url, multi_page=None, progress_callback=None):
     """
@@ -242,9 +293,93 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
         except Exception as e:
             print(f"    Warning: AI Content analysis failed: {e}")
             results['categories']['ai_content'] = {'score': 0, 'error': str(e), 'insights': {}}
+
+        # Advanced SEO Analysis (2025) - 5 AI analyzers
+        print("  - Advanced SEO analysis (SERP, Intent, E-E-A-T, Semantic, Readability)...")
+        try:
+            # Auto-detect primary keywords from meta title + H1
+            primary_keywords = extract_primary_keywords(html_content)
+            print(f"    Detected keywords: {', '.join(primary_keywords)}")
+
+            advanced_seo = {
+                'score': 0,
+                'sub_scores': {},
+                'insights': {}
+            }
+
+            # 1. SERP & Competitive Analysis (with Google Search grounding)
+            print("    - SERP & Competitive analysis...")
+            try:
+                serp_result = analyze_serp_position(url, primary_keywords)
+                advanced_seo['sub_scores']['serp'] = serp_result.get('competitive_score', 50)
+                advanced_seo['insights']['serp'] = serp_result
+            except Exception as e:
+                print(f"      Warning: SERP analysis failed: {e}")
+                advanced_seo['sub_scores']['serp'] = 50
+
+            # 2. Search Intent Match
+            print("    - Search Intent analysis...")
+            try:
+                intent_result = analyze_search_intent_match(url, html_content, primary_keywords)
+                advanced_seo['sub_scores']['intent'] = intent_result.get('intent_score', 50)
+                advanced_seo['insights']['intent'] = intent_result
+            except Exception as e:
+                print(f"      Warning: Intent analysis failed: {e}")
+                advanced_seo['sub_scores']['intent'] = 50
+
+            # 3. E-E-A-T Signals (critical for Google 2025)
+            print("    - E-E-A-T analysis...")
+            try:
+                eeat_result = analyze_eeat_signals(url, html_content)
+                advanced_seo['sub_scores']['eeat'] = eeat_result.get('overall_eeat_score', 50)
+                advanced_seo['insights']['eeat'] = eeat_result
+            except Exception as e:
+                print(f"      Warning: E-E-A-T analysis failed: {e}")
+                advanced_seo['sub_scores']['eeat'] = 50
+
+            # 4. Semantic SEO (entities, topics, LSI)
+            print("    - Semantic SEO analysis...")
+            try:
+                semantic_result = analyze_semantic_seo(html_content, primary_keywords)
+                advanced_seo['sub_scores']['semantic'] = semantic_result.get('semantic_score', 50)
+                advanced_seo['insights']['semantic'] = semantic_result
+            except Exception as e:
+                print(f"      Warning: Semantic analysis failed: {e}")
+                advanced_seo['sub_scores']['semantic'] = 50
+
+            # 5. Readability & UX
+            print("    - Readability & UX analysis...")
+            try:
+                readability_result = analyze_readability_ux(html_content, target_audience='general')
+                advanced_seo['sub_scores']['readability'] = readability_result.get('overall_readability_score', 50)
+                advanced_seo['insights']['readability'] = readability_result
+            except Exception as e:
+                print(f"      Warning: Readability analysis failed: {e}")
+                advanced_seo['sub_scores']['readability'] = 50
+
+            # Calculate overall Advanced SEO score (average of 5 sub-scores)
+            sub_scores = list(advanced_seo['sub_scores'].values())
+            if sub_scores:
+                advanced_seo['score'] = round(sum(sub_scores) / len(sub_scores), 1)
+            else:
+                advanced_seo['score'] = 50
+
+            results['categories']['advanced_seo'] = advanced_seo
+            print(f"    Advanced SEO Score: {advanced_seo['score']}/100")
+
+        except Exception as e:
+            print(f"    Warning: Advanced SEO analysis failed: {e}")
+            results['categories']['advanced_seo'] = {
+                'score': 50,
+                'error': str(e),
+                'sub_scores': {},
+                'insights': {}
+            }
+
     else:
         print("  - AI analysis disabled in config")
         results['categories']['ai_content'] = {'score': 0, 'insights': {'disabled': True}}
+        results['categories']['advanced_seo'] = {'score': 0, 'insights': {'disabled': True}}
 
     # Oblicz finalny score
     final_score = calculate_final_score(results['categories'])

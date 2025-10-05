@@ -241,6 +241,21 @@ def create_ai_analyzer(api_key: str, model: str = "gemini-2.5-flash") -> Optiona
         return None
 
 
+# Helper function to get Gemini model directly (for new analyzers)
+def get_gemini_model():
+    """
+    Get configured Gemini model instance for direct use.
+    Used by new Advanced SEO analyzers.
+
+    Returns:
+        genai.GenerativeModel: Configured Gemini model instance
+    """
+    from config import GEMINI_API_KEY, GEMINI_MODEL
+    import google.generativeai as genai
+
+    genai.configure(api_key=GEMINI_API_KEY)
+    return genai.GenerativeModel(GEMINI_MODEL)
+
 # Convenience class for backward compatibility
 class AIEngine:
     """Backward compatibility wrapper for AIAnalyzer"""

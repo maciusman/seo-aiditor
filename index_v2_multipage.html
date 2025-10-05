@@ -428,6 +428,7 @@
             ] : [
                 { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
                 { id: 'categories', label: 'Kategorie', icon: '📋', badge: Object.keys(results.categories || {}).length },
+                { id: 'advanced_seo', label: 'Advanced SEO', icon: '🚀', badge: results.categories?.advanced_seo ? '2025' : null },
                 { id: 'issues', label: 'Problemy', icon: '⚠️', badge: results.all_issues?.length || 0 },
                 { id: 'quickwins', label: 'Quick Wins', icon: '⚡', badge: results.quick_wins?.length || 0 }
             ];
@@ -465,6 +466,7 @@
                             <>
                                 {activeTab === 'overview' && <OverviewTabSingle results={results} exportCSV={exportCSV} exportJSON={exportJSON} />}
                                 {activeTab === 'categories' && <CategoriesTab results={results} />}
+                                {activeTab === 'advanced_seo' && <AdvancedSEOTab results={results} />}
                                 {activeTab === 'issues' && <IssuesTabSingle results={results} />}
                                 {activeTab === 'quickwins' && <QuickWinsTab results={results} />}
                             </>
@@ -1012,6 +1014,269 @@
                             </button>
                         </div>
                     </div>
+                </div>
+            );
+        }
+
+        // Advanced SEO Tab (2025) - SERP, Intent, E-E-A-T, Semantic, Readability
+        function AdvancedSEOTab({ results }) {
+            const advancedSeo = results.categories?.advanced_seo || {};
+            const [expandedSection, setExpandedSection] = useState(null);
+
+            if (!advancedSeo.score) {
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <p className="text-gray-600">Advanced SEO analysis not available. Enable AI analysis to use this feature.</p>
+                    </div>
+                );
+            }
+
+            const sections = [
+                { id: 'serp', label: 'SERP & Competitive', icon: '🔍', score: advancedSeo.sub_scores?.serp || 0, insights: advancedSeo.insights?.serp },
+                { id: 'intent', label: 'Search Intent Match', icon: '🎯', score: advancedSeo.sub_scores?.intent || 0, insights: advancedSeo.insights?.intent },
+                { id: 'eeat', label: 'E-E-A-T Signals', icon: '⭐', score: advancedSeo.sub_scores?.eeat || 0, insights: advancedSeo.insights?.eeat },
+                { id: 'semantic', label: 'Semantic SEO', icon: '🧠', score: advancedSeo.sub_scores?.semantic || 0, insights: advancedSeo.insights?.semantic },
+                { id: 'readability', label: 'Readability & UX', icon: '📖', score: advancedSeo.sub_scores?.readability || 0, insights: advancedSeo.insights?.readability }
+            ];
+
+            return (
+                <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-md p-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className="text-2xl font-bold">🚀 Advanced SEO (2025)</h2>
+                            <span className="text-4xl font-bold">{Math.round(advancedSeo.score)}/100</span>
+                        </div>
+                        <p className="text-purple-100">Next-gen SEO powered by Gemini 2.5 Flash + Google Search grounding</p>
+                    </div>
+
+                    {sections.map(section => (
+                        <div key={section.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div
+                                className="collapsible-header p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+                                onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
+                            >
+                                <div className="flex items-center gap-3 flex-1">
+                                    <span className="text-2xl">{section.icon}</span>
+                                    <h3 className="font-bold">{section.label}</h3>
+                                    <span className={`text-2xl font-bold ${getScoreColor(section.score)}`}>
+                                        {Math.round(section.score)}
+                                    </span>
+                                </div>
+                                <span className="text-gray-400">{expandedSection === section.id ? '▼' : '▶'}</span>
+                            </div>
+
+                            {expandedSection === section.id && section.insights && (
+                                <div className="p-6 border-t bg-gray-50 space-y-4">
+                                    {/* SERP Analysis */}
+                                    {section.id === 'serp' && (
+                                        <>
+                                            {section.insights.currently_ranking !== undefined && (
+                                                <div className="mb-4">
+                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                                                        section.insights.currently_ranking ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                    }`}>
+                                                        {section.insights.currently_ranking ? '✓ Ranking' : '✗ Not Ranking'}
+                                                        {section.insights.ranking_position && ` (Position ${section.insights.ranking_position})`}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {section.insights.top_competitors && section.insights.top_competitors.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Top Competitors:</h4>
+                                                    {section.insights.top_competitors.map((comp, idx) => (
+                                                        <div key={idx} className="bg-white p-3 rounded mb-2">
+                                                            <a href={comp.url} target="_blank" className="text-blue-600 hover:underline font-medium">{comp.title}</a>
+                                                            <p className="text-sm text-gray-600 mt-1">Strengths: {comp.strengths?.join(', ')}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {section.insights.content_gaps && section.insights.content_gaps.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Content Gaps:</h4>
+                                                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                                        {section.insights.content_gaps.map((gap, idx) => <li key={idx}>{gap}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            {section.insights.key_insights && (
+                                                <div className="bg-blue-50 p-3 rounded">
+                                                    <p className="text-sm text-blue-900">{section.insights.key_insights}</p>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {/* Intent Analysis */}
+                                    {section.id === 'intent' && (
+                                        <>
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <div className="bg-white p-3 rounded">
+                                                    <span className="text-sm text-gray-600">Detected Intent:</span>
+                                                    <p className="font-bold capitalize">{section.insights.detected_intent}</p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded">
+                                                    <span className="text-sm text-gray-600">Confidence:</span>
+                                                    <p className="font-bold">{section.insights.intent_confidence}%</p>
+                                                </div>
+                                            </div>
+                                            {section.insights.mismatches && section.insights.mismatches.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2 text-red-700">Mismatches:</h4>
+                                                    <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
+                                                        {section.insights.mismatches.map((m, idx) => <li key={idx}>{m}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            {section.insights.recommendations && section.insights.recommendations.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Recommendations:</h4>
+                                                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                                        {section.insights.recommendations.map((rec, idx) => <li key={idx}>{rec}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {/* E-E-A-T Analysis */}
+                                    {section.id === 'eeat' && (
+                                        <>
+                                            <div className="grid grid-cols-4 gap-3 mb-4">
+                                                <div className="bg-white p-3 rounded text-center">
+                                                    <p className="text-xs text-gray-600 mb-1">Experience</p>
+                                                    <p className={`text-xl font-bold ${getScoreColor(section.insights.experience_score)}`}>
+                                                        {section.insights.experience_score}
+                                                    </p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded text-center">
+                                                    <p className="text-xs text-gray-600 mb-1">Expertise</p>
+                                                    <p className={`text-xl font-bold ${getScoreColor(section.insights.expertise_score)}`}>
+                                                        {section.insights.expertise_score}
+                                                    </p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded text-center">
+                                                    <p className="text-xs text-gray-600 mb-1">Authoritativeness</p>
+                                                    <p className={`text-xl font-bold ${getScoreColor(section.insights.authoritativeness_score)}`}>
+                                                        {section.insights.authoritativeness_score}
+                                                    </p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded text-center">
+                                                    <p className="text-xs text-gray-600 mb-1">Trustworthiness</p>
+                                                    <p className={`text-xl font-bold ${getScoreColor(section.insights.trustworthiness_score)}`}>
+                                                        {section.insights.trustworthiness_score}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {section.insights.eeat_grade && (
+                                                <div className="text-center mb-4">
+                                                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-lg font-bold ${
+                                                        section.insights.eeat_grade === 'excellent' ? 'bg-green-100 text-green-800' :
+                                                        section.insights.eeat_grade === 'good' ? 'bg-blue-100 text-blue-800' :
+                                                        section.insights.eeat_grade === 'needs_improvement' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-red-100 text-red-800'
+                                                    }`}>
+                                                        Grade: {section.insights.eeat_grade.replace('_', ' ').toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {section.insights.critical_issues && section.insights.critical_issues.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2 text-red-700">Critical Issues:</h4>
+                                                    <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
+                                                        {section.insights.critical_issues.map((issue, idx) => <li key={idx}>{issue}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {/* Semantic SEO */}
+                                    {section.id === 'semantic' && (
+                                        <>
+                                            {section.insights.entities_found && section.insights.entities_found.length > 0 && (
+                                                <div className="mb-4">
+                                                    <h4 className="font-semibold mb-2">Entities Found:</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {section.insights.entities_found.slice(0, 10).map((entity, idx) => (
+                                                            <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                {entity.name} ({entity.type})
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {section.insights.topics_covered && section.insights.topics_covered.length > 0 && (
+                                                <div className="mb-4">
+                                                    <h4 className="font-semibold mb-2">Topics Covered:</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {section.insights.topics_covered.map((topic, idx) => (
+                                                            <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                {topic}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {section.insights.topics_missing && section.insights.topics_missing.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2 text-orange-700">Topics Missing:</h4>
+                                                    <ul className="list-disc list-inside text-sm text-orange-600 space-y-1">
+                                                        {section.insights.topics_missing.map((topic, idx) => <li key={idx}>{topic}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            {section.insights.keyword_stuffing_detected && (
+                                                <div className="bg-red-50 p-3 rounded">
+                                                    <p className="text-sm text-red-700 font-semibold">⚠️ Keyword stuffing detected!</p>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {/* Readability & UX */}
+                                    {section.id === 'readability' && (
+                                        <>
+                                            <div className="grid grid-cols-3 gap-3 mb-4">
+                                                <div className="bg-white p-3 rounded text-center">
+                                                    <p className="text-xs text-gray-600 mb-1">Reading Level</p>
+                                                    <p className="font-bold capitalize">{section.insights.readability_grade?.replace('_', ' ')}</p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded text-center">
+                                                    <p className="text-xs text-gray-600 mb-1">Flesch Score</p>
+                                                    <p className="font-bold">{section.insights.flesch_score_estimate}</p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded text-center">
+                                                    <p className="text-xs text-gray-600 mb-1">Avg Sentence</p>
+                                                    <p className="font-bold">{section.insights.avg_sentence_length} words</p>
+                                                </div>
+                                            </div>
+                                            {section.insights.cta_quality && (
+                                                <div className="mb-4">
+                                                    <span className="text-sm text-gray-600">CTA Quality: </span>
+                                                    <span className={`font-semibold ${
+                                                        section.insights.cta_quality === 'clear_actionable' ? 'text-green-600' :
+                                                        section.insights.cta_quality === 'present_but_weak' ? 'text-yellow-600' :
+                                                        'text-red-600'
+                                                    }`}>
+                                                        {section.insights.cta_quality.replace('_', ' ').toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {section.insights.recommendations && section.insights.recommendations.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Recommendations:</h4>
+                                                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                                        {section.insights.recommendations.map((rec, idx) => <li key={idx}>{rec}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
             );
         }
