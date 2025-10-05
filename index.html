@@ -797,6 +797,14 @@
             return 'score-critical';
         };
 
+        const getGradeLabel = (score) => {
+            if (score >= 90) return 'Excellent';
+            if (score >= 75) return 'Great';
+            if (score >= 60) return 'Good';
+            if (score >= 40) return 'Needs Improvement';
+            return 'Poor';
+        };
+
         const getBadgeClass = (severity) => {
             if (severity === 'critical') return 'badge-critical';
             if (severity === 'important') return 'badge-important';
@@ -1820,11 +1828,17 @@
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.experience_score)}`}>
                                                         {section.insights.experience_score}
                                                     </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {getGradeLabel(section.insights.experience_score)}
+                                                    </p>
                                                 </div>
                                                 <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Expertise</p>
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.expertise_score)}`}>
                                                         {section.insights.expertise_score}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {getGradeLabel(section.insights.expertise_score)}
                                                     </p>
                                                 </div>
                                                 <div className="bg-white p-3 rounded text-center border border-gray-200">
@@ -1832,11 +1846,17 @@
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.authoritativeness_score)}`}>
                                                         {section.insights.authoritativeness_score}
                                                     </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {getGradeLabel(section.insights.authoritativeness_score)}
+                                                    </p>
                                                 </div>
                                                 <div className="bg-white p-3 rounded text-center border border-gray-200">
                                                     <p className="text-xs text-gray-600 mb-1">Trustworthiness</p>
                                                     <p className={`text-xl font-bold ${getScoreColor(section.insights.trustworthiness_score)}`}>
                                                         {section.insights.trustworthiness_score}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {getGradeLabel(section.insights.trustworthiness_score)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -1852,11 +1872,27 @@
                                                     </span>
                                                 </div>
                                             )}
+                                            {section.insights.strengths && section.insights.strengths.length > 0 && (
+                                                <div className="mb-4">
+                                                    <h4 className="font-semibold mb-2 text-green-700">Strengths:</h4>
+                                                    <ul className="list-disc list-inside text-sm text-green-600 space-y-1">
+                                                        {section.insights.strengths.map((strength, idx) => <li key={idx}>{strength}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
                                             {section.insights.critical_issues && section.insights.critical_issues.length > 0 && (
-                                                <div>
+                                                <div className="mb-4">
                                                     <h4 className="font-semibold mb-2 text-red-700">Critical Issues:</h4>
                                                     <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
                                                         {section.insights.critical_issues.map((issue, idx) => <li key={idx}>{issue}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            {section.insights.recommendations && section.insights.recommendations.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Recommendations:</h4>
+                                                    <ul className="list-disc list-inside text-sm space-y-1">
+                                                        {section.insights.recommendations.map((rec, idx) => <li key={idx}>{rec}</li>)}
                                                     </ul>
                                                 </div>
                                             )}
@@ -1967,7 +2003,7 @@
                         </div>
                     )}
 
-                    {Object.entries(results.categories || {}).map(([catName, catData]) => (
+                    {Object.entries(results.categories || {}).filter(([catName]) => catName !== 'advanced_seo' && catName !== 'ai_content').map(([catName, catData]) => (
                         <div key={catName} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <div
                                 className="collapsible-header p-4 flex justify-between items-center"
@@ -2025,6 +2061,30 @@
                             )}
                         </div>
                     ))}
+
+                    {/* AI Content - Special rendering */}
+                    {results.categories?.ai_content && results.categories.ai_content.score > 0 && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold">AI Content Quality</h3>
+                                <span className={`text-3xl font-bold ${getScoreColor(results.categories.ai_content.score)}`}>
+                                    {Math.round(results.categories.ai_content.score)}/100
+                                </span>
+                            </div>
+                            {results.categories.ai_content.insights && (
+                                <div className="text-sm text-gray-600">
+                                    <p>{JSON.stringify(results.categories.ai_content.insights).substring(0, 200)}...</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Advanced SEO - Use dedicated component */}
+                    {results.categories?.advanced_seo && results.categories.advanced_seo.score > 0 && (
+                        <div className="mt-6">
+                            <AdvancedSEOTab results={results} />
+                        </div>
+                    )}
                 </div>
             );
         }
