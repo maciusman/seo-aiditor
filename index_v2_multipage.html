@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO AIditor - Multi-Page Intelligence</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab-nav::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .tab-nav::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 2px;
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+
+        .tab-button:hover {
+            color: #4f46e5;
+            background: #f9fafb;
+        }
+
+        .tab-button.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: #f9fafb;
+        }
+
+        .tab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.125rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        /* Mobile responsive */
+        .page-selector {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pages-sidebar {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .page-selector {
+                display: none;
+            }
+
+            .pages-sidebar {
+                display: block;
+                position: sticky;
+                top: 70px;
+                width: 280px;
+                max-height: calc(100vh - 90px);
+                overflow-y: auto;
+            }
+
+            .pages-content {
+                flex: 1;
+                margin-left: 1.5rem;
+            }
+        }
+
+        /* Score colors */
+        .score-excellent { color: #10B981; }
+        .score-good { color: #84CC16; }
+        .score-warning { color: #F59E0B; }
+        .score-poor { color: #EF4444; }
+        .score-critical { color: #DC2626; }
+
+        /* Progress bars */
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+
+        /* Badges */
+        .badge-critical {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-important {
+            background-color: #FEF3C7;
+            color: #92400E;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-recommendation {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Collapsible */
+        .collapsible-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .collapsible-header:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px currentColor;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [url, setUrl] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [auditResults, setAuditResults] = useState(null);
+            const [progress, setProgress] = useState(0);
+            const [currentStep, setCurrentStep] = useState('');
+            const [error, setError] = useState(null);
+
+            const runAudit = async () => {
+                if (!url) {
+                    alert('Proszę wprowadzić URL');
+                    return;
+                }
+
+                setLoading(true);
+                setProgress(0);
+                setError(null);
+                setAuditResults(null);
+
+                try {
+                    const progressSteps = [
+                        'Pobieranie strony głównej...',
+                        'Analiza techniczna...',
+                        'Analiza on-page SEO...',
+                        'Sprawdzanie indeksowania...',
+                        'Analiza treści...',
+                        'PageSpeed Insights...',
+                        'AI: Analiza jakości treści...',
+                        'AI: Wykrywanie typu witryny...',
+                        'AI: Wybór reprezentatywnych stron...',
+                        'Pobieranie dodatkowych stron...',
+                        'AI: Holistyczna analiza...',
+                        'Generowanie rekomendacji...'
+                    ];
+
+                    let stepIndex = 0;
+                    const progressInterval = setInterval(() => {
+                        if (stepIndex < progressSteps.length) {
+                            setCurrentStep(progressSteps[stepIndex]);
+                            setProgress(Math.min((stepIndex / progressSteps.length) * 90, 90));
+                            stepIndex++;
+                        }
+                    }, 4000);
+
+                    const API_URL = 'http://localhost:5000/api/audit';
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ url: url })
+                    });
+
+                    clearInterval(progressInterval);
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Błąd podczas audytu');
+                    }
+
+                    const results = await response.json();
+
+                    setProgress(100);
+                    setCurrentStep('Audyt ukończony!');
+                    setAuditResults(results);
+
+                } catch (err) {
+                    setError(err.message);
+                    console.error('Błąd audytu:', err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const exportToCSV = () => {
+                if (!auditResults) return;
+                const dataStr = JSON.stringify(auditResults, null, 2);
+                const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(dataStr);
+                const link = document.createElement('a');
+                link.setAttribute('href', dataUri);
+                link.setAttribute('download', `seo-audit-${Date.now()}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const exportToJSON = () => {
+                if (!auditResults) return;
+                const dataStr = JSON.stringify(auditResults, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const link = document.createElement('a');
+                link.setAttribute('href', dataUri);
+                link.setAttribute('download', `seo-audit-${Date.now()}.json`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            return (
+                <div className="min-h-screen">
+                    {/* Header */}
+                    <header className="gradient-bg text-white py-6 px-4 shadow-lg">
+                        <div className="max-w-7xl mx-auto">
+                            <h1 className="text-2xl md:text-3xl font-bold">SEO AIditor</h1>
+                            <p className="text-blue-100 text-sm">Multi-Page Intelligence × AI-Powered Insights</p>
+                        </div>
+                    </header>
+
+                    {/* URL Input */}
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Wprowadź URL strony do audytu
+                            </label>
+                            <div className="flex flex-col md:flex-row gap-3">
+                                <input
+                                    type="url"
+                                    value={url}
+                                    onChange={(e) => setUrl(e.target.value)}
+                                    placeholder="https://example.com"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    disabled={loading}
+                                    onKeyPress={(e) => e.key === 'Enter' && runAudit()}
+                                />
+                                <button
+                                    onClick={runAudit}
+                                    disabled={loading}
+                                    className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md"
+                                >
+                                    {loading ? 'Analizuję...' : 'Uruchom audyt'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Loading State */}
+                        {loading && (
+                            <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+                                <div className="mb-4">
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span className="font-medium text-gray-700">{currentStep}</span>
+                                        <span className="text-gray-500">{progress}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-3">
+                                        <div
+                                            className="progress-bar bg-gradient-to-r from-purple-600 to-indigo-600 h-3 rounded-full"
+                                            style={{width: `${progress}%`}}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-600 loading-pulse">
+                                    ⏳ Multi-page analiza może potrwać 30-90 sekund...
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Error State */}
+                        {error && (
+                            <div className="mt-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                                <p className="text-red-800 font-medium">❌ Błąd: {error}</p>
+                            </div>
+                        )}
+
+                        {/* Results */}
+                        {auditResults && !loading && (
+                            <AuditResults
+                                results={auditResults}
+                                exportCSV={exportToCSV}
+                                exportJSON={exportToJSON}
+                                onNewAudit={() => setAuditResults(null)}
+                            />
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="mt-12 py-6 text-center text-gray-500 text-sm border-t">
+                        <p>SEO AIditor &copy; 2025 | Powered by Gemini 2.5 Flash AI</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        // Main Results Component
+        function AuditResults({ results, exportCSV, exportJSON, onNewAudit }) {
+            const [activeTab, setActiveTab] = useState('overview');
+            const [selectedPageId, setSelectedPageId] = useState('homepage');
+
+            const isMultiPage = results.audit_type === 'multi-page';
+
+            // For multi-page, prepare data
+            const allPages = isMultiPage ? [
+                {
+                    id: 'homepage',
+                    label: '🏠 Strona główna',
+                    url: results.url,
+                    data: results.homepage
+                },
+                ...(results.additional_pages || []).map((page, idx) => ({
+                    id: `page-${idx}`,
+                    label: page.page_type || 'Strona',
+                    url: page.url,
+                    data: page
+                }))
+            ] : [];
+
+            const tabs = isMultiPage ? [
+                { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
+                { id: 'pages', label: 'Strony', icon: '📄', badge: results.pages_analyzed },
+                { id: 'templates', label: 'Szablony', icon: '🎨', badge: results.site_wide_analysis?.template_insights?.length || 0 },
+                { id: 'issues', label: 'Problemy', icon: '⚠️', badge: (results.homepage?.all_issues?.length || 0) + (results.site_wide_analysis?.cross_page_issues?.length || 0) },
+                { id: 'strategy', label: 'Strategia', icon: '🎯', badge: null }
+            ] : [
+                { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
+                { id: 'categories', label: 'Kategorie', icon: '📋', badge: Object.keys(results.categories || {}).length },
+                { id: 'issues', label: 'Problemy', icon: '⚠️', badge: results.all_issues?.length || 0 },
+                { id: 'quickwins', label: 'Quick Wins', icon: '⚡', badge: results.quick_wins?.length || 0 }
+            ];
+
+            return (
+                <div className="mt-6">
+                    {/* Tab Navigation */}
+                    <div className="tab-nav rounded-t-lg">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                <span className="text-lg">{tab.icon}</span>
+                                <span className="hidden md:inline">{tab.label}</span>
+                                {tab.badge !== null && tab.badge > 0 && (
+                                    <span className="tab-badge">{tab.badge}</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="mt-6">
+                        {isMultiPage ? (
+                            <>
+                                {activeTab === 'overview' && <OverviewTabMulti results={results} exportCSV={exportCSV} exportJSON={exportJSON} />}
+                                {activeTab === 'pages' && <PagesTabMulti results={results} allPages={allPages} selectedPageId={selectedPageId} setSelectedPageId={setSelectedPageId} />}
+                                {activeTab === 'templates' && <TemplatesTab results={results} />}
+                                {activeTab === 'issues' && <IssuesTabMulti results={results} />}
+                                {activeTab === 'strategy' && <StrategyTab results={results} />}
+                            </>
+                        ) : (
+                            <>
+                                {activeTab === 'overview' && <OverviewTabSingle results={results} exportCSV={exportCSV} exportJSON={exportJSON} />}
+                                {activeTab === 'categories' && <CategoriesTab results={results} />}
+                                {activeTab === 'issues' && <IssuesTabSingle results={results} />}
+                                {activeTab === 'quickwins' && <QuickWinsTab results={results} />}
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Utility functions
+        const getScoreColor = (score) => {
+            if (score >= 90) return 'score-excellent';
+            if (score >= 75) return 'score-good';
+            if (score >= 60) return 'score-warning';
+            if (score >= 40) return 'score-poor';
+            return 'score-critical';
+        };
+
+        const getBadgeClass = (severity) => {
+            if (severity === 'critical') return 'badge-critical';
+            if (severity === 'important') return 'badge-important';
+            return 'badge-recommendation';
+        };
+
+        const formatUrl = (url) => {
+            try {
+                const urlObj = new URL(url);
+                return urlObj.hostname + urlObj.pathname;
+            } catch {
+                return url;
+            }
+        };
+
+        // MULTI-PAGE TAB COMPONENTS
+
+        function OverviewTabMulti({ results, exportCSV, exportJSON }) {
+            const siteWide = results.site_wide_analysis || {};
+
+            return (
+                <div className="space-y-6">
+                    {/* Executive Summary */}
+                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200">
+                        <h3 className="text-xl font-bold text-purple-900 mb-3">📝 Podsumowanie wykonawcze</h3>
+                        <p className="text-gray-800 leading-relaxed">
+                            {siteWide.executive_summary || 'Multi-page analysis wykonana pomyślnie. Przeanalizowano ' + results.pages_analyzed + ' stron witryny ' + results.site_type + '.'}
+                        </p>
+                    </div>
+
+                    {/* Score Cards */}
+                    <div className="grid md:grid-cols-3 gap-4">
+                        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                            <div className="text-sm text-gray-600 mb-2">Wynik strony głównej</div>
+                            <div className={`text-5xl font-bold ${getScoreColor(results.final_score)}`}>
+                                {results.final_score}
+                            </div>
+                            <div className="text-sm text-gray-500 mt-1">{results.grade?.label || 'N/A'}</div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                            <div className="text-sm text-gray-600 mb-2">Wynik holistyczny</div>
+                            <div className={`text-5xl font-bold ${getScoreColor(siteWide.holistic_score || 0)}`}>
+                                {siteWide.holistic_score || 0}
+                            </div>
+                            <div className="text-sm text-gray-500 mt-1">Całościowa ocena SEO</div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                            <div className="text-sm text-gray-600 mb-2">Przeanalizowane strony</div>
+                            <div className="text-5xl font-bold text-purple-600">
+                                {results.pages_analyzed}
+                            </div>
+                            <div className="text-sm text-gray-500 mt-1">{results.site_type} ({results.site_type_confidence}%)</div>
+                        </div>
+                    </div>
+
+                    {/* Pages Preview */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-bold mb-4">🌐 Przeanalizowane strony</h3>
+                        <div className="space-y-3">
+                            {/* Homepage */}
+                            <div className="p-4 bg-purple-50 border-l-4 border-purple-500 rounded">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <div className="font-semibold text-purple-900">🏠 Strona główna</div>
+                                        <div className="text-sm text-gray-600 break-all mt-1">{results.url}</div>
+                                    </div>
+                                    <div className={`text-2xl font-bold ${getScoreColor(results.final_score)}`}>
+                                        {results.final_score}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Additional pages */}
+                            {results.additional_pages && results.additional_pages.map((page, idx) => (
+                                <div key={idx} className="p-4 bg-gray-50 border-l-4 border-gray-300 rounded">
+                                    <div className="font-semibold capitalize">{page.page_type}</div>
+                                    <div className="text-sm text-gray-600 break-all mt-1">{page.url}</div>
+                                    <div className="text-xs text-gray-500 mt-2">💡 {page.selection_reason}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Export */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-bold mb-4">📥 Eksport wyników</h3>
+                        <div className="flex flex-wrap gap-3">
+                            <button onClick={exportJSON} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md">
+                                📄 Eksport JSON
+                            </button>
+                            <button onClick={exportCSV} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-md">
+                                📊 Eksport CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function PagesTabMulti({ results, allPages, selectedPageId, setSelectedPageId }) {
+            const selectedPage = allPages.find(p => p.id === selectedPageId);
+
+            return (
+                <div>
+                    {/* Mobile dropdown */}
+                    <select
+                        className="page-selector"
+                        value={selectedPageId}
+                        onChange={(e) => setSelectedPageId(e.target.value)}
+                    >
+                        {allPages.map(page => (
+                            <option key={page.id} value={page.id}>{page.label} - {formatUrl(page.url)}</option>
+                        ))}
+                    </select>
+
+                    {/* Desktop layout */}
+                    <div className="md:flex">
+                        {/* Sidebar */}
+                        <div className="pages-sidebar bg-white rounded-lg shadow-md p-4">
+                            <h3 className="font-bold mb-3 text-gray-700">Wybierz stronę</h3>
+                            <div className="space-y-2">
+                                {allPages.map(page => (
+                                    <button
+                                        key={page.id}
+                                        onClick={() => setSelectedPageId(page.id)}
+                                        className={`w-full text-left px-4 py-3 rounded-lg transition ${
+                                            selectedPageId === page.id
+                                                ? 'bg-purple-100 text-purple-900 font-semibold border-l-4 border-purple-500'
+                                                : 'hover:bg-gray-100 border-l-4 border-transparent'
+                                        }`}
+                                    >
+                                        <div className="font-medium">{page.label}</div>
+                                        <div className="text-xs text-gray-500 mt-1 truncate">{formatUrl(page.url)}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="pages-content">
+                            {selectedPage && (
+                                <div className="bg-white rounded-lg shadow-md p-6">
+                                    <h3 className="text-xl font-bold mb-2">{selectedPage.label}</h3>
+                                    <a href={selectedPage.url} target="_blank" rel="noopener" className="text-sm text-blue-600 hover:underline break-all block mb-6">
+                                        {selectedPage.url} ↗
+                                    </a>
+
+                                    {selectedPageId === 'homepage' ? (
+                                        <CategoriesTab results={selectedPage.data} showUrl={false} />
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                                <p className="text-sm"><strong>Powód wyboru:</strong> {selectedPage.data.selection_reason}</p>
+                                                <p className="text-sm mt-2"><strong>Oczekiwane spostrzeżenia:</strong> {selectedPage.data.expected_insights}</p>
+                                            </div>
+                                            <p className="text-gray-500 text-sm">
+                                                ℹ️ Dla dodatkowych stron dostępna jest tylko holistyczna analiza AI (zobacz zakładki: Szablony i Strategia).
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function TemplatesTab({ results }) {
+            const siteWide = results.site_wide_analysis || {};
+            const templateInsights = siteWide.template_insights || [];
+
+            if (templateInsights.length === 0) {
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                        <p className="text-gray-500">Brak informacji o szablonach. Multi-page analysis może nie być dostępna lub nie wykryto wzorców szablonów.</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg p-6">
+                        <h3 className="text-xl font-bold mb-2">🎨 Analiza szablonów</h3>
+                        <p className="text-gray-700">
+                            Problemy wykryte na poziomie szablonów wpływają na wiele stron jednocześnie.
+                            <strong> Naprawienie jednego szablonu = naprawienie dziesiątek stron!</strong>
+                        </p>
+                    </div>
+
+                    {templateInsights.map((template, idx) => (
+                        <div key={idx} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 className="text-lg font-bold">{template.template_name}</h4>
+                                    <p className="text-sm text-gray-600">Dotyczy: <strong>{template.pages_affected}</strong></p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                        template.seo_impact === 'HIGH' ? 'bg-red-100 text-red-800' :
+                                        template.seo_impact === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-green-100 text-green-800'
+                                    }`}>
+                                        {template.seo_impact} SEO
+                                    </span>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                        template.fix_difficulty === 'EASY' ? 'bg-green-100 text-green-800' :
+                                        template.fix_difficulty === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-red-100 text-red-800'
+                                    }`}>
+                                        {template.fix_difficulty}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                {template.critical_issues && template.critical_issues.length > 0 && (
+                                    <div className="bg-red-50 border border-red-200 rounded p-3">
+                                        <h5 className="font-semibold text-sm mb-2 text-red-900">❌ Krytyczne problemy:</h5>
+                                        <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                                            {template.critical_issues.map((issue, i) => (
+                                                <li key={i}>{issue}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                                    <p className="text-sm"><strong>💼 Wpływ biznesowy:</strong> {template.business_impact}</p>
+                                </div>
+
+                                <div className="bg-green-50 border border-green-200 rounded p-3">
+                                    <p className="text-sm"><strong>🔧 Zalecana naprawa:</strong> {template.recommended_fix}</p>
+                                </div>
+
+                                <div className="bg-purple-50 border border-purple-200 rounded p-3">
+                                    <p className="text-sm"><strong>📈 Oczekiwana poprawa:</strong> {template.expected_improvement}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function IssuesTabMulti({ results }) {
+            const [sortBy, setSortBy] = useState('impact');
+            const [filterSeverity, setFilterSeverity] = useState('all');
+
+            // Collect issues from homepage with URL
+            let allIssues = [];
+            if (results.homepage && results.homepage.all_issues) {
+                allIssues = results.homepage.all_issues.map(issue => ({
+                    ...issue,
+                    url: results.url,
+                    pageLabel: '🏠 Strona główna'
+                }));
+            }
+
+            // Add cross-page issues
+            if (results.site_wide_analysis && results.site_wide_analysis.cross_page_issues) {
+                allIssues = [...allIssues, ...results.site_wide_analysis.cross_page_issues.map(issue => ({
+                    title: issue.issue,
+                    description: issue.recommended_solution,
+                    severity: issue.severity.toLowerCase(),
+                    impact: issue.severity === 'CRITICAL' ? 10 : issue.severity === 'HIGH' ? 8 : 5,
+                    url: 'multiple',
+                    pageLabel: '🌐 Wiele stron',
+                    pagesAffected: issue.pages_affected
+                }))];
+            }
+
+            // Filter
+            let filteredIssues = allIssues;
+            if (filterSeverity !== 'all') {
+                filteredIssues = filteredIssues.filter(issue => issue.severity === filterSeverity);
+            }
+
+            // Sort
+            if (sortBy === 'impact') {
+                filteredIssues.sort((a, b) => (b.impact || 0) - (a.impact || 0));
+            } else if (sortBy === 'severity') {
+                const severityOrder = { critical: 0, important: 1, recommendation: 2 };
+                filteredIssues.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+            }
+
+            return (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold mb-4">⚠️ Wszystkie problemy ({filteredIssues.length})</h3>
+
+                    {/* Filters */}
+                    <div className="flex flex-col md:flex-row gap-3 mb-6 pb-6 border-b">
+                        <div className="flex-1">
+                            <label className="text-sm text-gray-600 block mb-1">Sortuj według:</label>
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full px-4 py-2 border rounded-lg"
+                            >
+                                <option value="impact">Wpływ (malejąco)</option>
+                                <option value="severity">Waga</option>
+                            </select>
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-sm text-gray-600 block mb-1">Filtruj według wagi:</label>
+                            <select
+                                value={filterSeverity}
+                                onChange={(e) => setFilterSeverity(e.target.value)}
+                                className="w-full px-4 py-2 border rounded-lg"
+                            >
+                                <option value="all">Wszystkie ({allIssues.length})</option>
+                                <option value="critical">Krytyczne ({allIssues.filter(i => i.severity === 'critical').length})</option>
+                                <option value="important">Ważne ({allIssues.filter(i => i.severity === 'important').length})</option>
+                                <option value="recommendation">Rekomendacje ({allIssues.filter(i => i.severity === 'recommendation').length})</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Issues list */}
+                    <div className="space-y-3">
+                        {filteredIssues.length === 0 ? (
+                            <p className="text-gray-500 text-center py-8">Brak problemów do wyświetlenia.</p>
+                        ) : (
+                            filteredIssues.map((issue, idx) => (
+                                <div key={idx} className="p-4 border-l-4 border-orange-500 bg-orange-50 rounded-r hover:shadow-md transition">
+                                    <div className="flex items-start justify-between gap-3 mb-2">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className={getBadgeClass(issue.severity)}>{issue.severity?.toUpperCase()}</span>
+                                                <span className="text-xs text-gray-500">Impact: {issue.impact}/10</span>
+                                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{issue.pageLabel}</span>
+                                            </div>
+                                            <h4 className="font-bold text-gray-800">{issue.title}</h4>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-sm text-gray-700 mb-2">{issue.description}</p>
+
+                                    {/* URL reference */}
+                                    <div className="mt-3 pt-3 border-t border-orange-200">
+                                        <p className="text-xs text-gray-600 mb-1"><strong>🔗 Dotyczy:</strong></p>
+                                        {issue.url === 'multiple' ? (
+                                            <p className="text-xs text-gray-600 bg-white px-2 py-1 rounded inline-block">
+                                                {issue.pagesAffected || 'Wiele stron'}
+                                            </p>
+                                        ) : (
+                                            <a href={issue.url} target="_blank" rel="noopener" className="text-xs text-blue-600 hover:underline break-all">
+                                                {issue.url} ↗
+                                            </a>
+                                        )}
+                                    </div>
+
+                                    {issue.fix && (
+                                        <div className="mt-3 bg-white border border-orange-200 rounded p-2">
+                                            <p className="text-xs text-gray-600"><strong>🔧 Jak naprawić:</strong></p>
+                                            <p className="text-xs text-gray-700 mt-1">{issue.fix}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function StrategyTab({ results }) {
+            const siteWide = results.site_wide_analysis || {};
+            const actionPlan = results.homepage?.ai_action_plan || results.ai_action_plan || {};
+            const recommendations = siteWide.scalable_recommendations || [];
+            const roadmap = actionPlan.action_plan?.roadmap || siteWide.roadmap || {};
+
+            return (
+                <div className="space-y-6">
+                    {/* Site Strategy */}
+                    {siteWide.site_strategy && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h3 className="text-xl font-bold mb-4">🎯 Strategia witryny</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-600">Główny cel biznesowy</p>
+                                    <p className="font-semibold mt-1">{siteWide.site_strategy.primary_business_goal}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">Jasność grupy docelowej</p>
+                                    <p className={`text-2xl font-bold mt-1 ${getScoreColor(siteWide.site_strategy.target_audience_clarity)}`}>
+                                        {siteWide.site_strategy.target_audience_clarity}/100
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Scalable Recommendations */}
+                    {recommendations.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h3 className="text-xl font-bold mb-4">🚀 Skalowalne rekomendacje</h3>
+                            <div className="space-y-4">
+                                {recommendations.map((rec, idx) => (
+                                    <div key={idx} className="border-l-4 border-purple-500 bg-purple-50 rounded-r p-4">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <h4 className="font-bold flex-1">{rec.recommendation}</h4>
+                                            <span className={`px-3 py-1 rounded text-xs font-semibold ml-2 ${
+                                                rec.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' :
+                                                rec.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                                                rec.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-green-100 text-green-800'
+                                            }`}>
+                                                {rec.priority}
+                                            </span>
+                                        </div>
+
+                                        <div className="grid md:grid-cols-2 gap-3 text-sm mb-3">
+                                            <div>
+                                                <span className="text-gray-600">Kategoria:</span> <strong>{rec.category}</strong>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-600">Zakres:</span> <strong>{rec.scope}</strong>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-600">Czas:</span> <strong>{rec.time_estimate}</strong>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-600">Odpowiedzialny:</span> <strong>{rec.owner}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white border border-purple-200 rounded p-3">
+                                            <p className="text-sm"><strong>💼 Wpływ biznesowy:</strong> {rec.business_impact}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Roadmap */}
+                    {(roadmap['30_days'] || roadmap.week_1) && (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h3 className="text-xl font-bold mb-4">📅 Mapa drogowa</h3>
+                            <div className="space-y-6">
+                                {(roadmap['30_days'] || roadmap.week_1) && (
+                                    <div className="timeline-item">
+                                        <div className="timeline-dot bg-red-500"></div>
+                                        <h4 className="font-bold text-red-900 mb-2">Miesiąc 1 (Pilne)</h4>
+                                        {(roadmap['30_days'] || roadmap.week_1).map((item, idx) => (
+                                            <div key={idx} className="mb-3 p-3 bg-red-50 rounded">
+                                                <p className="font-semibold">{typeof item === 'string' ? item : item.action}</p>
+                                                {item.description && <p className="text-sm text-gray-600 mt-1">{item.description}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {(roadmap['60_days'] || roadmap.month_1) && (
+                                    <div className="timeline-item">
+                                        <div className="timeline-dot bg-orange-500"></div>
+                                        <h4 className="font-bold text-orange-900 mb-2">Miesiąc 2-3</h4>
+                                        {(roadmap['60_days'] || roadmap.month_1).map((item, idx) => (
+                                            <div key={idx} className="mb-3 p-3 bg-orange-50 rounded">
+                                                <p className="font-semibold">{typeof item === 'string' ? item : item.action}</p>
+                                                {item.description && <p className="text-sm text-gray-600 mt-1">{item.description}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {(roadmap['90_days'] || roadmap.month_3) && (
+                                    <div className="timeline-item">
+                                        <div className="timeline-dot bg-blue-500"></div>
+                                        <h4 className="font-bold text-blue-900 mb-2">Miesiąc 3+</h4>
+                                        {(roadmap['90_days'] || roadmap.month_3).map((item, idx) => (
+                                            <div key={idx} className="mb-3 p-3 bg-blue-50 rounded">
+                                                <p className="font-semibold">{typeof item === 'string' ? item : item.action}</p>
+                                                {item.description && <p className="text-sm text-gray-600 mt-1">{item.description}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // SINGLE-PAGE TAB COMPONENTS
+
+        function OverviewTabSingle({ results, exportCSV, exportJSON }) {
+            return (
+                <div className="space-y-6">
+                    {/* Score Card */}
+                    <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                        <h2 className="text-2xl font-bold mb-4">Wynik audytu SEO</h2>
+                        <div className={`text-6xl font-bold ${getScoreColor(results.final_score)} mb-2`}>
+                            {results.final_score}/100
+                        </div>
+                        <div className="text-lg text-gray-600">{results.grade?.label}</div>
+                        <a href={results.url} target="_blank" rel="noopener" className="text-sm text-blue-600 hover:underline break-all block mt-4">
+                            {results.url} ↗
+                        </a>
+                    </div>
+
+                    {/* Category Scores */}
+                    <div className="grid md:grid-cols-3 gap-4">
+                        {Object.entries(results.categories || {}).map(([catName, catData]) => (
+                            <div key={catName} className="bg-white rounded-lg shadow-md p-4 text-center">
+                                <div className="text-sm text-gray-600 mb-2 capitalize">{catName}</div>
+                                <div className={`text-4xl font-bold ${getScoreColor(catData.score)}`}>
+                                    {Math.round(catData.score)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Export */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-bold mb-4">📥 Eksport wyników</h3>
+                        <div className="flex flex-wrap gap-3">
+                            <button onClick={exportJSON} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                📄 JSON
+                            </button>
+                            <button onClick={exportCSV} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                📊 CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function CategoriesTab({ results, showUrl = true }) {
+            const [expandedCategory, setExpandedCategory] = useState(null);
+
+            return (
+                <div className="space-y-4">
+                    {showUrl && (
+                        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+                            <p className="text-sm text-gray-600">Analizowana strona:</p>
+                            <a href={results.url} target="_blank" rel="noopener" className="text-blue-600 hover:underline break-all">
+                                {results.url} ↗
+                            </a>
+                        </div>
+                    )}
+
+                    {Object.entries(results.categories || {}).map(([catName, catData]) => (
+                        <div key={catName} className="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div
+                                className="collapsible-header p-4 flex justify-between items-center"
+                                onClick={() => setExpandedCategory(expandedCategory === catName ? null : catName)}
+                            >
+                                <div className="flex items-center gap-3 flex-1">
+                                    <h3 className="font-bold capitalize">{catName}</h3>
+                                    <span className={`text-2xl font-bold ${getScoreColor(catData.score)}`}>
+                                        {Math.round(catData.score)}
+                                    </span>
+                                </div>
+                                <span className="text-gray-400">{expandedCategory === catName ? '▼' : '▶'}</span>
+                            </div>
+
+                            {expandedCategory === catName && (
+                                <div className="p-4 border-t bg-gray-50">
+                                    {/* Checks */}
+                                    {catData.checks && Object.keys(catData.checks).length > 0 && (
+                                        <div className="mb-4">
+                                            <h4 className="font-semibold mb-2">Szczegóły:</h4>
+                                            <div className="space-y-2">
+                                                {Object.entries(catData.checks).map(([checkKey, checkData]) => (
+                                                    <div key={checkKey} className="flex items-center justify-between p-2 bg-white rounded">
+                                                        <span className="capitalize text-sm">{checkKey.replace(/_/g, ' ')}</span>
+                                                        <span className="font-medium">{checkData.value}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Issues */}
+                                    {catData.issues && catData.issues.length > 0 && (
+                                        <div>
+                                            <h4 className="font-semibold mb-2">Problemy:</h4>
+                                            <div className="space-y-2">
+                                                {catData.issues.map((issue, idx) => (
+                                                    <div key={idx} className="p-3 bg-white border-l-4 border-orange-500 rounded-r">
+                                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                                            <h5 className="font-bold flex-1">{issue.title}</h5>
+                                                            <span className={getBadgeClass(issue.severity)}>{issue.severity}</span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600">{issue.description}</p>
+                                                        {showUrl && (
+                                                            <p className="text-xs text-gray-500 mt-2">
+                                                                🔗 {results.url}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function IssuesTabSingle({ results }) {
+            return (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold mb-4">⚠️ Wszystkie problemy ({results.all_issues?.length || 0})</h3>
+
+                    <div className="mb-4 p-3 bg-blue-50 rounded">
+                        <p className="text-sm"><strong>🔗 Analizowana strona:</strong></p>
+                        <a href={results.url} target="_blank" rel="noopener" className="text-sm text-blue-600 hover:underline break-all">
+                            {results.url} ↗
+                        </a>
+                    </div>
+
+                    <div className="space-y-3">
+                        {results.all_issues && results.all_issues.map((issue, idx) => (
+                            <div key={idx} className="p-4 border-l-4 border-orange-500 bg-orange-50 rounded-r">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className={getBadgeClass(issue.severity)}>{issue.severity}</span>
+                                            <span className="text-xs text-gray-500">Impact: {issue.impact}/10</span>
+                                        </div>
+                                        <h4 className="font-bold">{issue.title}</h4>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-700 mb-2">{issue.description}</p>
+                                {issue.fix && (
+                                    <div className="mt-2 p-2 bg-white rounded border">
+                                        <p className="text-xs text-gray-600"><strong>🔧 Fix:</strong> {issue.fix}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function QuickWinsTab({ results }) {
+            return (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold mb-4">⚡ Quick Wins ({results.quick_wins?.length || 0})</h3>
+                    <p className="text-gray-600 mb-6">Szybkie wygrane - wysokie ROI, niski wysiłek</p>
+
+                    <div className="space-y-4">
+                        {results.quick_wins && results.quick_wins.map((win, idx) => (
+                            <div key={idx} className="border-l-4 border-green-500 bg-green-50 rounded-r p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                    <h4 className="font-bold flex-1">{win.title}</h4>
+                                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Impact: {win.impact}/10</span>
+                                </div>
+                                <p className="text-sm text-gray-700 mb-2">{win.description}</p>
+                                <div className="mt-3 p-2 bg-white rounded border border-green-200">
+                                    <p className="text-xs"><strong>🔗 Dotyczy:</strong> {results.url}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Render
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

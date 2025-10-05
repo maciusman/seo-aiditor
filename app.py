@@ -67,7 +67,6 @@ def audit():
         # Production mode: Accept API keys from user
         if config.REQUIRE_USER_API_KEYS:
             user_gemini_key = data.get('gemini_key')
-            user_psi_key = data.get('psi_key', '')
 
             if not user_gemini_key:
                 return jsonify({
@@ -77,14 +76,12 @@ def audit():
             # Temporarily set environment variables for this request only
             # Store original values for cleanup
             original_gemini = os.environ.get('GEMINI_API_KEY')
-            original_psi = os.environ.get('GOOGLE_PSI_API_KEY')
 
             try:
-                # Set user-provided keys
+                # Set user-provided key
                 os.environ['GEMINI_API_KEY'] = user_gemini_key
-                os.environ['GOOGLE_PSI_API_KEY'] = user_psi_key
 
-                # Run the audit with user's keys
+                # Run the audit with user's key
                 results = run_audit(url)
 
             finally:
@@ -93,11 +90,6 @@ def audit():
                     os.environ['GEMINI_API_KEY'] = original_gemini
                 elif 'GEMINI_API_KEY' in os.environ:
                     del os.environ['GEMINI_API_KEY']
-
-                if original_psi is not None:
-                    os.environ['GOOGLE_PSI_API_KEY'] = original_psi
-                elif 'GOOGLE_PSI_API_KEY' in os.environ:
-                    del os.environ['GOOGLE_PSI_API_KEY']
 
         else:
             # Local mode: Use keys from config_local.py
@@ -151,7 +143,6 @@ def audit_stream():
 
     url = data.get('url')
     user_gemini_key = data.get('gemini_key') if config.REQUIRE_USER_API_KEYS else None
-    user_psi_key = data.get('psi_key', '') if config.REQUIRE_USER_API_KEYS else None
 
     def generate():
         """Generator function that yields SSE events"""
@@ -168,13 +159,11 @@ def audit_stream():
                     yield f"data: {json.dumps({'type': 'error', 'message': 'Gemini API key is required'})}\n\n"
                     return
 
-                # Set user-provided keys
+                # Set user-provided key
                 original_gemini = os.environ.get('GEMINI_API_KEY')
-                original_psi = os.environ.get('GOOGLE_PSI_API_KEY')
 
                 try:
                     os.environ['GEMINI_API_KEY'] = user_gemini_key
-                    os.environ['GOOGLE_PSI_API_KEY'] = user_psi_key
 
                     # Create a queue for progress events (thread-safe communication)
                     progress_queue = queue.Queue()
@@ -255,11 +244,6 @@ def audit_stream():
                         os.environ['GEMINI_API_KEY'] = original_gemini
                     elif 'GEMINI_API_KEY' in os.environ:
                         del os.environ['GEMINI_API_KEY']
-
-                    if original_psi is not None:
-                        os.environ['GOOGLE_PSI_API_KEY'] = original_psi
-                    elif 'GOOGLE_PSI_API_KEY' in os.environ:
-                        del os.environ['GOOGLE_PSI_API_KEY']
 
             else:
                 # Local mode - same threading pattern

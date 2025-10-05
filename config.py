@@ -42,16 +42,14 @@ IS_PRODUCTION = (ENV == 'production')
 if ENV == 'local':
     # Local development: Import from config_local.py
     try:
-        from config_local import GOOGLE_PSI_API_KEY, GEMINI_API_KEY
+        from config_local import GEMINI_API_KEY
         REQUIRE_USER_API_KEYS = False
     except ImportError:
         # config_local.py doesn't exist - fallback to environment or placeholders
-        GOOGLE_PSI_API_KEY = os.getenv('GOOGLE_PSI_API_KEY', 'YOUR_API_KEY_HERE')
         GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'YOUR_GEMINI_API_KEY_HERE')
         REQUIRE_USER_API_KEYS = False
 else:
     # Production: Users must provide their own API keys
-    GOOGLE_PSI_API_KEY = None
     GEMINI_API_KEY = None
     REQUIRE_USER_API_KEYS = True
 
@@ -66,19 +64,20 @@ MULTI_PAGE_TIMEOUT = 60  # Total timeout for multi-page analysis (seconds)
 
 # Timeouts
 REQUEST_TIMEOUT = 10  # sekundy
-PSI_TIMEOUT = 30  # PSI może trwać dłużej
 
 # User agent
 USER_AGENT = "SEO-Audit-Tool/1.0 (Educational Purpose)"
 
-# Scoring weights
+# Scoring weights (updated for 2025 SEO priorities)
 WEIGHTS = {
-    "technical": 0.20,
-    "onpage": 0.25,
-    "indexing": 0.20,
-    "content": 0.20,
-    "advanced": 0.15
+    "technical": 0.15,      # 20% → 15% (reduced)
+    "onpage": 0.20,         # 25% → 20% (reduced)
+    "indexing": 0.15,       # 20% → 15% (reduced)
+    "content": 0.15,        # 20% → 15% (reduced)
+    "ai_content": 0.15,     # Existing AI Content analysis (15%)
+    "advanced_seo": 0.20    # NEW! Advanced SEO (E-E-A-T, Intent, Semantic, etc.) - highest weight (20%)
 }
+# TOTAL: 100%
 
 # Thresholds
 THRESHOLDS = {
