@@ -13,7 +13,7 @@ import os
 import json
 from ai_engine import get_gemini_model
 
-def analyze_readability_ux(html_content, target_audience='general'):
+def analyze_readability_ux(html_content, target_audience='general', language='en'):
     """
     Comprehensive readability and UX writing analysis.
 
@@ -21,6 +21,7 @@ def analyze_readability_ux(html_content, target_audience='general'):
         html_content: Full HTML content
         target_audience: Target audience level ('general', 'technical', 'professional', etc.)
                         Auto-detected if not specified
+        language: Detected page language (en, pl, de, es, fr, etc.)
 
     Returns:
         dict: Readability and UX analysis
@@ -28,9 +29,21 @@ def analyze_readability_ux(html_content, target_audience='general'):
 
     model = get_gemini_model()
 
+    # Language-specific instructions
+    lang_instructions = {
+        'pl': "Odpowiedz PO POLSKU (JSON labels po angielsku, wartości po polsku).",
+        'en': "Respond in ENGLISH.",
+        'de': "Antworte auf DEUTSCH (JSON labels auf Englisch, Werte auf Deutsch).",
+        'es': "Responde en ESPAÑOL (etiquetas JSON en inglés, valores en español).",
+        'fr': "Répondez en FRANÇAIS (étiquettes JSON en anglais, valeurs en français)."
+    }
+
+    lang_instruction = lang_instructions.get(language, lang_instructions['en'])
+
     html_excerpt = html_content[:100000]
 
-    prompt = f"""
+    prompt = f"""{lang_instruction}
+
 Analyze readability and UX for content.
 
 Target audience: {target_audience} (detect actual audience from content if different)

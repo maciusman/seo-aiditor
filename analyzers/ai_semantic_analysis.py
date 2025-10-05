@@ -14,7 +14,7 @@ import os
 import json
 from ai_engine import get_gemini_model
 
-def analyze_semantic_seo(url, html_content, primary_keyword):
+def analyze_semantic_seo(url, html_content, primary_keyword, language='en'):
     """
     Deep semantic analysis - entities, topics, LSI keywords.
 
@@ -24,6 +24,7 @@ def analyze_semantic_seo(url, html_content, primary_keyword):
         url: Target URL
         html_content: Full HTML content
         primary_keyword: Primary target keyword
+        language: Detected page language (en, pl, de, es, fr, etc.)
 
     Returns:
         dict: Semantic SEO analysis
@@ -31,10 +32,22 @@ def analyze_semantic_seo(url, html_content, primary_keyword):
 
     model = get_gemini_model()
 
+    # Language-specific instructions
+    lang_instructions = {
+        'pl': "Odpowiedz PO POLSKU (JSON labels po angielsku, wartości po polsku).",
+        'en': "Respond in ENGLISH.",
+        'de': "Antworte auf DEUTSCH (JSON labels auf Englisch, Werte auf Deutsch).",
+        'es': "Responde en ESPAÑOL (etiquetas JSON en inglés, valores en español).",
+        'fr': "Répondez en FRANÇAIS (étiquettes JSON en anglais, valeurs en français)."
+    }
+
+    lang_instruction = lang_instructions.get(language, lang_instructions['en'])
+
     html_excerpt = html_content[:100000]
     keyword_str = primary_keyword if isinstance(primary_keyword, str) else ", ".join(primary_keyword)
 
-    prompt = f"""
+    prompt = f"""{lang_instruction}
+
 Semantic SEO analysis for: {url}
 Primary keyword: {keyword_str}
 

@@ -310,7 +310,7 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
             # 1. SERP & Competitive Analysis (with Google Search grounding)
             print("    - SERP & Competitive analysis...")
             try:
-                serp_result = analyze_serp_position(url, primary_keywords)
+                serp_result = analyze_serp_position(url, primary_keywords, language=detected_language)
                 advanced_seo['sub_scores']['serp'] = serp_result.get('competitive_score', 50)
                 advanced_seo['insights']['serp'] = serp_result
             except Exception as e:
@@ -320,7 +320,7 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
             # 2. Search Intent Match
             print("    - Search Intent analysis...")
             try:
-                intent_result = analyze_search_intent_match(url, html_content, primary_keywords)
+                intent_result = analyze_search_intent_match(url, html_content, primary_keywords, language=detected_language)
                 advanced_seo['sub_scores']['intent'] = intent_result.get('intent_score', 50)
                 advanced_seo['insights']['intent'] = intent_result
             except Exception as e:
@@ -330,7 +330,7 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
             # 3. E-E-A-T Signals (critical for Google 2025)
             print("    - E-E-A-T analysis...")
             try:
-                eeat_result = analyze_eeat_signals(url, html_content)
+                eeat_result = analyze_eeat_signals(url, html_content, language=detected_language)
                 advanced_seo['sub_scores']['eeat'] = eeat_result.get('overall_eeat_score', 50)
                 advanced_seo['insights']['eeat'] = eeat_result
             except Exception as e:
@@ -340,7 +340,9 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
             # 4. Semantic SEO (entities, topics, LSI)
             print("    - Semantic SEO analysis...")
             try:
-                semantic_result = analyze_semantic_seo(html_content, primary_keywords)
+                # Note: analyze_semantic_seo expects (url, html_content, primary_keyword) - singular keyword
+                primary_kw = primary_keywords[0] if isinstance(primary_keywords, list) and primary_keywords else 'seo'
+                semantic_result = analyze_semantic_seo(url, html_content, primary_kw, language=detected_language)
                 advanced_seo['sub_scores']['semantic'] = semantic_result.get('semantic_score', 50)
                 advanced_seo['insights']['semantic'] = semantic_result
             except Exception as e:
@@ -350,7 +352,7 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
             # 5. Readability & UX
             print("    - Readability & UX analysis...")
             try:
-                readability_result = analyze_readability_ux(html_content, target_audience='general')
+                readability_result = analyze_readability_ux(html_content, target_audience='general', language=detected_language)
                 advanced_seo['sub_scores']['readability'] = readability_result.get('overall_readability_score', 50)
                 advanced_seo['insights']['readability'] = readability_result
             except Exception as e:

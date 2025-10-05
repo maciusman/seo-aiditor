@@ -13,7 +13,7 @@ import os
 import json
 from ai_engine import get_gemini_model
 
-def analyze_search_intent_match(url, html_content, primary_keywords):
+def analyze_search_intent_match(url, html_content, primary_keywords, language='en'):
     """
     Analyze if page content matches search intent for target keywords.
 
@@ -23,6 +23,7 @@ def analyze_search_intent_match(url, html_content, primary_keywords):
         url: Target URL
         html_content: Full HTML content (can be up to 100k tokens!)
         primary_keywords: Target keywords
+        language: Detected page language (en, pl, de, es, fr, etc.)
 
     Returns:
         dict: Intent analysis results
@@ -30,12 +31,24 @@ def analyze_search_intent_match(url, html_content, primary_keywords):
 
     model = get_gemini_model()
 
+    # Language-specific instructions
+    lang_instructions = {
+        'pl': "Odpowiedz PO POLSKU (JSON labels po angielsku, wartości po polsku).",
+        'en': "Respond in ENGLISH.",
+        'de': "Antworte auf DEUTSCH (JSON labels auf Englisch, Werte auf Deutsch).",
+        'es': "Responde en ESPAÑOL (etiquetas JSON en inglés, valores en español).",
+        'fr': "Répondez en FRANÇAIS (étiquettes JSON en anglais, valeurs en français)."
+    }
+
+    lang_instruction = lang_instructions.get(language, lang_instructions['en'])
+
     # Truncate HTML to 100k characters (~75k words, well within 1M token limit)
     html_excerpt = html_content[:100000]
 
     keywords_str = ", ".join(primary_keywords) if isinstance(primary_keywords, list) else primary_keywords
 
-    prompt = f"""
+    prompt = f"""{lang_instruction}
+
 Analyze search intent match for: {url}
 
 Target keywords: {keywords_str}

@@ -13,13 +13,14 @@ import os
 import json
 from ai_engine import get_gemini_model
 
-def analyze_serp_position(url, primary_keywords):
+def analyze_serp_position(url, primary_keywords, language='en'):
     """
     Analyze SERP position and competitive landscape using Google Search grounding.
 
     Args:
         url: Target URL to analyze
         primary_keywords: List of primary keywords (auto-detected from meta title + H1)
+        language: Detected page language (en, pl, de, es, fr, etc.)
 
     Returns:
         dict: SERP analysis with competitive insights
@@ -27,10 +28,22 @@ def analyze_serp_position(url, primary_keywords):
 
     model = get_gemini_model()
 
+    # Language-specific instructions
+    lang_instructions = {
+        'pl': "Odpowiedz PO POLSKU (JSON labels po angielsku, wartości po polsku).",
+        'en': "Respond in ENGLISH.",
+        'de': "Antworte auf DEUTSCH (JSON labels auf Englisch, Werte auf Deutsch).",
+        'es': "Responde en ESPAÑOL (etiquetas JSON en inglés, valores en español).",
+        'fr': "Répondez en FRANÇAIS (étiquettes JSON en anglais, valeurs en français)."
+    }
+
+    lang_instruction = lang_instructions.get(language, lang_instructions['en'])
+
     # Format keywords for prompt
     keywords_str = ", ".join(primary_keywords) if isinstance(primary_keywords, list) else primary_keywords
 
-    prompt = f"""
+    prompt = f"""{lang_instruction}
+
 Analyze SERP position and competitive landscape for: {url}
 
 Target keywords: {keywords_str}

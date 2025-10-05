@@ -9,7 +9,7 @@ import os
 import json
 from ai_engine import get_gemini_model
 
-def analyze_eeat_signals(url, html_content):
+def analyze_eeat_signals(url, html_content, language='en'):
     """
     Comprehensive E-E-A-T analysis using Gemini's deep understanding.
 
@@ -22,6 +22,7 @@ def analyze_eeat_signals(url, html_content):
     Args:
         url: Target URL
         html_content: Full HTML content
+        language: Detected page language (en, pl, de, es, fr, etc.)
 
     Returns:
         dict: E-E-A-T analysis with scores for each pillar
@@ -29,10 +30,22 @@ def analyze_eeat_signals(url, html_content):
 
     model = get_gemini_model()
 
+    # Language-specific instructions
+    lang_instructions = {
+        'pl': "Odpowiedz PO POLSKU (JSON labels po angielsku, wartości po polsku).",
+        'en': "Respond in ENGLISH.",
+        'de': "Antworte auf DEUTSCH (JSON labels auf Englisch, Werte auf Deutsch).",
+        'es': "Responde en ESPAÑOL (etiquetas JSON en inglés, valores en español).",
+        'fr': "Répondez en FRANÇAIS (étiquettes JSON en anglais, valeurs en français)."
+    }
+
+    lang_instruction = lang_instructions.get(language, lang_instructions['en'])
+
     # Use up to 100k chars of HTML (deep analysis)
     html_excerpt = html_content[:100000]
 
-    prompt = f"""
+    prompt = f"""{lang_instruction}
+
 Analyze E-E-A-T signals for: {url}
 
 Full page content:
