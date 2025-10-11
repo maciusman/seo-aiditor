@@ -67,9 +67,9 @@ def analyze_indexing(url, html_content):
             blocks_all = False
             if wildcard_blocks:
                 for block in wildcard_blocks:
-                    # Check if there's Disallow: / and no Allow: /
-                    has_disallow_root = '/' in block['disallows']
-                    has_allow_root = '/' in block['allows']
+                    # Check if there's EXACTLY Disallow: / (not /admin, /cart, etc.)
+                    has_disallow_root = any(d.strip() == '/' for d in block['disallows'])
+                    has_allow_root = any(a.strip() == '/' for a in block['allows'])
 
                     if has_disallow_root and not has_allow_root:
                         blocks_all = True
