@@ -13,8 +13,9 @@ Deep semantic analysis beyond basic keywords:
 import os
 import json
 from ai_engine import get_gemini_model
+from utils import extract_visible_text, detect_page_type
 
-def analyze_semantic_seo(url, html_content, primary_keyword, language='en'):
+def analyze_semantic_seo(url, html_content, primary_keyword, language='en', page_type=None, multipage_context=None):
     """
     Deep semantic analysis - entities, topics, LSI keywords.
 
@@ -25,6 +26,8 @@ def analyze_semantic_seo(url, html_content, primary_keyword, language='en'):
         html_content: Full HTML content
         primary_keyword: Primary target keyword
         language: Detected page language (en, pl, de, es, fr, etc.)
+        page_type: Page type (homepage/product/article/etc.) - auto-detected if None
+        multipage_context: Dict with info about other pages (for multi-page audits)
 
     Returns:
         dict: Semantic SEO analysis
@@ -43,16 +46,38 @@ def analyze_semantic_seo(url, html_content, primary_keyword, language='en'):
 
     lang_instruction = lang_instructions.get(language, lang_instructions['en'])
 
-    html_excerpt = html_content[:100000]
+    # Extract visible text only (not metadata)
+    visible_text = extract_visible_text(html_content, max_length=50000)
+
+    # Detect page type if not provided
+    if not page_type:
+        page_type = detect_page_type(html_content)
+
     keyword_str = primary_keyword if isinstance(primary_keyword, str) else ", ".join(primary_keyword)
+
+    # Build multi-page context string
+    multipage_info = ""
+    if multipage_context and multipage_context.get('pages_analyzed', 0) > 1:
+        multipage_info = f"""
+MULTI-PAGE AUDIT CONTEXT:
+- Total pages analyzed: {multipage_context.get('pages_analyzed', 'N/A')}
+- Other pages in audit: {', '.join(multipage_context.get('other_page_types', []))}
+- Site type: {multipage_context.get('site_type', 'unknown')}
+
+IMPORTANT: For "topics_missing", consider what's covered on OTHER pages.
+Only list topics missing from THE ENTIRE SITE, not just this page.
+"""
 
     prompt = f"""{lang_instruction}
 
 Semantic SEO analysis for: {url}
 Primary keyword: {keyword_str}
+Page type: {page_type}
 
-Content:
-{html_excerpt}
+{multipage_info}
+
+VISIBLE CONTENT (scripts/metadata removed):
+{visible_text}
 
 Perform deep semantic analysis:
 
@@ -83,9 +108,21 @@ Main topics covered:
 - How deeply is each covered? (comprehensive vs surface-level)
 
 Related topics MISSING (semantic gaps):
-- What related topics SHOULD be covered but aren't?
-- What questions about {keyword_str} are NOT answered?
-- What subtopics do comprehensive guides usually include?
+
+CONTEXT-AWARE ANALYSIS:
+- Page type: {page_type}
+  * homepage/category: High-level overview expected. Detailed info on subpages is NORMAL.
+    → Only flag critical gaps (e.g., "No value proposition", "Missing product benefits")
+    → Do NOT flag: "No detailed specs", "No pricing" (expected on product pages)
+
+  * article/blog: Comprehensive single-page coverage expected.
+    → Flag missing subtopics that article should address
+
+  * product: Detailed specs, pricing, reviews expected.
+    → Flag: "No specifications", "No customer reviews"
+
+- What related topics SHOULD be covered on THIS page type but aren't?
+- What questions about {{keyword_str}} are NOT answered on THIS page type?
 
 ═══════════════════════════════════
 3. LSI KEYWORDS (Latent Semantic Indexing)
@@ -142,9 +179,20 @@ Return valid JSON:
         ...
     ],
 
-    "topics_missing": [
-        "Missing topic 1: Should cover X but doesn't",
-        "Missing topic 2: No discussion of Y",
+    "topics_missing_critical": [
+        "Critical topic 1: Essential for this page type but completely absent",
+        ...
+    ],
+
+    "topics_expected_on_subpages": [
+        "Topic 1: Should be on product/category pages (not homepage)",
+        "Topic 2: Expected on FAQ/support pages",
+        ...
+    ],
+
+    "topics_missing_opportunity": [
+        "Topic 1: Would strengthen content but not essential",
+        "Topic 2: Nice-to-have for differentiation",
         ...
     ],
 
@@ -185,7 +233,9 @@ Return valid JSON:
 IMPORTANT:
 - Use full NLP analysis capabilities
 - Identify subtle semantic patterns
-- Focus on what's MISSING (gaps analysis)
+- Be page-type aware: Don't penalize homepage for lacking product details
+- If multi-page audit: Consider site-wide coverage, not just this page
+- Categorize missing topics: critical vs expected-on-subpages vs opportunity
 """
 
     try:

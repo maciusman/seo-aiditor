@@ -2,7 +2,7 @@
 import datetime
 import re
 from bs4 import BeautifulSoup
-from utils import validate_url, fetch_url
+from utils import validate_url, fetch_url, detect_site_type, detect_page_type
 from analyzers.technical import analyze_technical
 from analyzers.onpage import analyze_onpage
 from analyzers.indexing import analyze_indexing
@@ -327,10 +327,21 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
                 print(f"      Warning: Intent analysis failed: {e}")
                 advanced_seo['sub_scores']['intent'] = 50
 
+            # Detect site type and page type for context-aware analysis
+            site_type = detect_site_type(html_content)
+            page_type = detect_page_type(html_content)
+            print(f"    Detected: site_type={site_type}, page_type={page_type}")
+
             # 3. E-E-A-T Signals (critical for Google 2025)
             print("    - E-E-A-T analysis...")
             try:
-                eeat_result = analyze_eeat_signals(url, html_content, language=detected_language)
+                eeat_result = analyze_eeat_signals(
+                    url,
+                    html_content,
+                    language=detected_language,
+                    site_type=site_type,
+                    multipage_context=None  # Single-page mode
+                )
                 advanced_seo['sub_scores']['eeat'] = eeat_result.get('overall_eeat_score', 50)
                 advanced_seo['insights']['eeat'] = eeat_result
             except Exception as e:
@@ -342,7 +353,14 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
             try:
                 # Note: analyze_semantic_seo expects (url, html_content, primary_keyword) - singular keyword
                 primary_kw = primary_keywords[0] if isinstance(primary_keywords, list) and primary_keywords else 'seo'
-                semantic_result = analyze_semantic_seo(url, html_content, primary_kw, language=detected_language)
+                semantic_result = analyze_semantic_seo(
+                    url,
+                    html_content,
+                    primary_kw,
+                    language=detected_language,
+                    page_type=page_type,
+                    multipage_context=None  # Single-page mode
+                )
                 advanced_seo['sub_scores']['semantic'] = semantic_result.get('semantic_score', 50)
                 advanced_seo['insights']['semantic'] = semantic_result
             except Exception as e:
@@ -352,7 +370,12 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
             # 5. Readability & UX
             print("    - Readability & UX analysis...")
             try:
-                readability_result = analyze_readability_ux(html_content, target_audience='general', language=detected_language)
+                readability_result = analyze_readability_ux(
+                    html_content,
+                    target_audience='general',
+                    language=detected_language,
+                    page_type=page_type
+                )
                 advanced_seo['sub_scores']['readability'] = readability_result.get('overall_readability_score', 50)
                 advanced_seo['insights']['readability'] = readability_result
             except Exception as e:

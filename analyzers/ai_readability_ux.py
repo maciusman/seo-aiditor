@@ -12,8 +12,9 @@ Analyzes:
 import os
 import json
 from ai_engine import get_gemini_model
+from utils import extract_visible_text, detect_page_type
 
-def analyze_readability_ux(html_content, target_audience='general', language='en'):
+def analyze_readability_ux(html_content, target_audience='general', language='en', page_type=None):
     """
     Comprehensive readability and UX writing analysis.
 
@@ -22,6 +23,7 @@ def analyze_readability_ux(html_content, target_audience='general', language='en
         target_audience: Target audience level ('general', 'technical', 'professional', etc.)
                         Auto-detected if not specified
         language: Detected page language (en, pl, de, es, fr, etc.)
+        page_type: Page type (homepage/product/article/etc.) - auto-detected if None
 
     Returns:
         dict: Readability and UX analysis
@@ -40,16 +42,56 @@ def analyze_readability_ux(html_content, target_audience='general', language='en
 
     lang_instruction = lang_instructions.get(language, lang_instructions['en'])
 
-    html_excerpt = html_content[:100000]
+    # Extract visible text only (not metadata)
+    visible_text = extract_visible_text(html_content, max_length=50000)
+
+    # Detect page type if not provided
+    if not page_type:
+        page_type = detect_page_type(html_content)
+
+    # Page-type specific readability expectations
+    page_type_criteria = ""
+    if page_type in ['homepage', 'category']:
+        page_type_criteria = """
+PAGE TYPE: Homepage/Category
+Readability Expectations:
+- Short sentences (5-10 words) = IDEAL for quick scanning
+- Clear CTAs = CRITICAL
+- Action-oriented language = EXPECTED
+- Flesch score 80-100 = IDEAL (very easy to read)
+→ High readability score should NOT penalize short, punchy copy
+"""
+    elif page_type == 'article':
+        page_type_criteria = """
+PAGE TYPE: Article/Blog
+Readability Expectations:
+- Medium sentences (15-20 words) = GOOD for educational content
+- Storytelling, examples = EXPECTED
+- Flesch score 60-80 = IDEAL (fairly easy to read)
+→ Balance depth with accessibility
+"""
+    elif page_type == 'product':
+        page_type_criteria = """
+PAGE TYPE: Product Page
+Readability Expectations:
+- Mix of short (features) and medium (descriptions) sentences
+- Clear pricing, specs = CRITICAL
+- Customer reviews = IMPORTANT for trust
+- Flesch score 70-90 = IDEAL
+→ Focus on clarity for purchase decisions
+"""
 
     prompt = f"""{lang_instruction}
 
 Analyze readability and UX for content.
 
 Target audience: {target_audience} (detect actual audience from content if different)
+Page type: {page_type}
 
-Content:
-{html_excerpt}
+{page_type_criteria}
+
+VISIBLE CONTENT (scripts/metadata removed):
+{visible_text}
 
 Evaluate:
 
