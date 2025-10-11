@@ -152,8 +152,8 @@
 
         /* Badges */
         .badge-critical {
-            background-color: #991b1b;
-            color: #fca5a5;
+            background-color: #dc2626;
+            color: #ffffff;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -161,8 +161,8 @@
         }
 
         .badge-important {
-            background-color: #c2410c;
-            color: #fed7aa;
+            background-color: #ea580c;
+            color: #ffffff;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -171,7 +171,7 @@
 
         .badge-recommendation {
             background-color: #0c4a6e;
-            color: #7dd3fc;
+            color: #ffffff;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -732,14 +732,14 @@
             const tabs = isMultiPage ? [
                 { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
                 { id: 'pages', label: 'Strony', icon: '📄', badge: results.pages_analyzed },
-                { id: 'advanced_seo', label: 'Advanced SEO', icon: '🚀', badge: results.homepage?.categories?.advanced_seo ? '2025' : null },
+                { id: 'advanced_seo', label: 'AI Optimization', icon: '🤖', badge: null },
                 { id: 'templates', label: 'Szablony', icon: '🎨', badge: results.site_wide_analysis?.template_insights?.length || 0 },
                 { id: 'issues', label: 'Problemy', icon: '⚠️', badge: (results.homepage?.all_issues?.length || 0) + (results.site_wide_analysis?.cross_page_issues?.length || 0) },
                 { id: 'strategy', label: 'Strategia', icon: '🎯', badge: null }
             ] : [
                 { id: 'overview', label: 'Przegląd', icon: '📊', badge: null },
                 { id: 'categories', label: 'Kategorie', icon: '📋', badge: Object.keys(results.categories || {}).length },
-                { id: 'advanced_seo', label: 'Advanced SEO', icon: '🚀', badge: results.categories?.advanced_seo ? '2025' : null },
+                { id: 'advanced_seo', label: 'AI Optimization', icon: '🤖', badge: null },
                 { id: 'issues', label: 'Problemy', icon: '⚠️', badge: results.all_issues?.length || 0 },
                 { id: 'quickwins', label: 'Quick Wins', icon: '⚡', badge: results.quick_wins?.length || 0 }
             ];
@@ -1723,10 +1723,9 @@
                 <div className="space-y-4">
                     <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-md p-6">
                         <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-2xl font-bold">🚀 Advanced SEO (2025)</h2>
+                            <h2 className="text-2xl font-bold">🤖 AI Optimization</h2>
                             <span className="text-4xl font-bold">{Math.round(advancedSeo.score)}/100</span>
                         </div>
-                        <p className="text-purple-100">Next-gen SEO powered by Gemini 2.5 Flash + Google Search grounding</p>
                     </div>
 
                     {sections.map(section => (
@@ -1750,39 +1749,50 @@
                                     {/* SERP Analysis */}
                                     {section.id === 'serp' && (
                                         <>
-                                            {section.insights.currently_ranking !== undefined && (
-                                                <div className="mb-4">
-                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                                                        section.insights.currently_ranking ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                                    }`}>
-                                                        {section.insights.currently_ranking ? '✓ Ranking' : '✗ Not Ranking'}
-                                                        {section.insights.ranking_position && ` (Position ${section.insights.ranking_position})`}
-                                                    </span>
+                                            {!section.insights || section.insights.error || section.insights.success === false ? (
+                                                <div className="bg-yellow-50 p-4 rounded border border-yellow-200">
+                                                    <p className="text-sm text-yellow-800">
+                                                        ⚠️ SERP data not available.
+                                                        {section.insights?.error && ` (${section.insights.error})`}
+                                                    </p>
                                                 </div>
-                                            )}
-                                            {section.insights.top_competitors && section.insights.top_competitors.length > 0 && (
-                                                <div>
-                                                    <h4 className="font-semibold mb-2">Top Competitors:</h4>
-                                                    {section.insights.top_competitors.map((comp, idx) => (
-                                                        <div key={idx} className="bg-white p-3 rounded mb-2 border border-gray-200">
-                                                            <a href={comp.url} target="_blank" className="text-blue-600 hover:underline font-medium">{comp.title}</a>
-                                                            <p className="text-sm text-gray-600 mt-1">Strengths: {comp.strengths?.join(', ')}</p>
+                                            ) : (
+                                                <>
+                                                    {section.insights.currently_ranking !== undefined && (
+                                                        <div className="mb-4">
+                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                                                                section.insights.currently_ranking ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                            }`}>
+                                                                {section.insights.currently_ranking ? '✓ Ranking' : '✗ Not Ranking'}
+                                                                {section.insights.ranking_position && ` (Position ${section.insights.ranking_position})`}
+                                                            </span>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {section.insights.content_gaps && section.insights.content_gaps.length > 0 && (
-                                                <div>
-                                                    <h4 className="font-semibold mb-2">Content Gaps:</h4>
-                                                    <ul className="list-disc list-inside text-sm space-y-1">
-                                                        {section.insights.content_gaps.map((gap, idx) => <li key={idx}>{gap}</li>)}
-                                                    </ul>
-                                                </div>
-                                            )}
-                                            {section.insights.key_insights && (
-                                                <div className="bg-blue-50 p-3 rounded">
-                                                    <p className="text-sm text-blue-900">{section.insights.key_insights}</p>
-                                                </div>
+                                                    )}
+                                                    {section.insights.top_competitors && section.insights.top_competitors.length > 0 && (
+                                                        <div>
+                                                            <h4 className="font-semibold mb-2">Top Competitors:</h4>
+                                                            {section.insights.top_competitors.map((comp, idx) => (
+                                                                <div key={idx} className="bg-white p-3 rounded mb-2 border border-gray-200">
+                                                                    <a href={comp.url} target="_blank" className="text-blue-600 hover:underline font-medium">{comp.title}</a>
+                                                                    <p className="text-sm text-gray-600 mt-1">Strengths: {comp.strengths?.join(', ')}</p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {section.insights.content_gaps && section.insights.content_gaps.length > 0 && (
+                                                        <div>
+                                                            <h4 className="font-semibold mb-2">Content Gaps:</h4>
+                                                            <ul className="list-disc list-inside text-sm space-y-1">
+                                                                {section.insights.content_gaps.map((gap, idx) => <li key={idx}>{gap}</li>)}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+                                                    {section.insights.key_insights && (
+                                                        <div className="bg-blue-50 p-3 rounded">
+                                                            <p className="text-sm text-blue-900">{section.insights.key_insights}</p>
+                                                        </div>
+                                                    )}
+                                                </>
                                             )}
                                         </>
                                     )}
@@ -1800,20 +1810,34 @@
                                                     <p className="font-bold">{section.insights.intent_confidence}%</p>
                                                 </div>
                                             </div>
-                                            {section.insights.mismatches && section.insights.mismatches.length > 0 && (
-                                                <div>
+                                            {section.insights.intent_reasoning && (
+                                                <div className="bg-blue-50 p-3 rounded mb-4">
+                                                    <h4 className="font-semibold mb-2 text-blue-900">Why this intent?</h4>
+                                                    <p className="text-sm text-blue-800">{section.insights.intent_reasoning}</p>
+                                                </div>
+                                            )}
+                                            {section.insights.mismatches && section.insights.mismatches.length > 0 ? (
+                                                <div className="mb-4">
                                                     <h4 className="font-semibold mb-2 text-red-700">Mismatches:</h4>
                                                     <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
                                                         {section.insights.mismatches.map((m, idx) => <li key={idx}>{m}</li>)}
                                                     </ul>
                                                 </div>
+                                            ) : (
+                                                <div className="bg-green-50 p-3 rounded mb-4">
+                                                    <p className="text-sm text-green-700 font-semibold">✓ No mismatches detected</p>
+                                                </div>
                                             )}
-                                            {section.insights.recommendations && section.insights.recommendations.length > 0 && (
+                                            {section.insights.recommendations && section.insights.recommendations.length > 0 ? (
                                                 <div>
                                                     <h4 className="font-semibold mb-2">Recommendations:</h4>
                                                     <ul className="list-disc list-inside text-sm space-y-1">
                                                         {section.insights.recommendations.map((rec, idx) => <li key={idx}>{rec}</li>)}
                                                     </ul>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-green-50 p-3 rounded">
+                                                    <p className="text-sm text-green-700 font-semibold">✓ Intent perfectly matched</p>
                                                 </div>
                                             )}
                                         </>
@@ -1863,10 +1887,10 @@
                                             {section.insights.eeat_grade && (
                                                 <div className="text-center mb-4">
                                                     <span className={`inline-flex items-center px-4 py-2 rounded-full text-lg font-bold ${
-                                                        section.insights.eeat_grade === 'excellent' ? 'bg-green-100 text-green-800' :
-                                                        section.insights.eeat_grade === 'good' ? 'bg-blue-100 text-blue-800' :
-                                                        section.insights.eeat_grade === 'needs_improvement' ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-red-100 text-red-800'
+                                                        section.insights.eeat_grade === 'excellent' ? 'bg-green-600 text-white' :
+                                                        section.insights.eeat_grade === 'good' ? 'bg-blue-600 text-white' :
+                                                        section.insights.eeat_grade === 'needs_improvement' ? 'bg-yellow-600 text-white' :
+                                                        'bg-red-600 text-white'
                                                     }`}>
                                                         Grade: {section.insights.eeat_grade.replace('_', ' ').toUpperCase()}
                                                     </span>
@@ -2076,13 +2100,6 @@
                                     <p>{JSON.stringify(results.categories.ai_content.insights).substring(0, 200)}...</p>
                                 </div>
                             )}
-                        </div>
-                    )}
-
-                    {/* Advanced SEO - Use dedicated component */}
-                    {results.categories?.advanced_seo && results.categories.advanced_seo.score > 0 && (
-                        <div className="mt-6">
-                            <AdvancedSEOTab results={results} />
                         </div>
                     )}
                 </div>

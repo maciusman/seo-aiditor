@@ -22,8 +22,59 @@ def analyze_indexing(url, html_content):
         if robots_response.status_code == 200:
             robots_content = robots_response.text
 
-            # Sprawdź czy nie blokuje wszystkiego
-            blocks_all = 'Disallow: /' in robots_content and 'User-agent: *' in robots_content
+            # Parse robots.txt into User-agent blocks (to avoid false positives)
+            def parse_robots_blocks(content):
+                """Parse robots.txt into separate User-agent blocks"""
+                blocks = []
+                current_block = {'user_agent': None, 'disallows': [], 'allows': []}
+
+                for line in content.split('\n'):
+                    line = line.strip()
+
+                    # Ignore comments and empty lines
+                    if not line or line.startswith('#'):
+                        continue
+
+                    if line.lower().startswith('user-agent:'):
+                        # Save previous block if exists
+                        if current_block['user_agent']:
+                            blocks.append(current_block)
+                        # Start new block
+                        user_agent = line.split(':', 1)[1].strip()
+                        current_block = {'user_agent': user_agent, 'disallows': [], 'allows': []}
+
+                    elif line.lower().startswith('disallow:'):
+                        if current_block['user_agent']:
+                            path = line.split(':', 1)[1].strip()
+                            current_block['disallows'].append(path)
+
+                    elif line.lower().startswith('allow:'):
+                        if current_block['user_agent']:
+                            path = line.split(':', 1)[1].strip()
+                            current_block['allows'].append(path)
+
+                # Save last block
+                if current_block['user_agent']:
+                    blocks.append(current_block)
+
+                return blocks
+
+            # Parse blocks and check if User-agent: * blocks everything
+            blocks = parse_robots_blocks(robots_content)
+            wildcard_blocks = [b for b in blocks if b['user_agent'] == '*']
+
+            # Check if User-agent: * specifically has Disallow: / (without Allow: /)
+            blocks_all = False
+            if wildcard_blocks:
+                for block in wildcard_blocks:
+                    # Check if there's Disallow: / and no Allow: /
+                    has_disallow_root = '/' in block['disallows']
+                    has_allow_root = '/' in block['allows']
+
+                    if has_disallow_root and not has_allow_root:
+                        blocks_all = True
+                        break
+
             has_sitemap = 'Sitemap:' in robots_content
 
             results['checks']['robots_txt'] = {
@@ -38,7 +89,7 @@ def analyze_indexing(url, html_content):
                     'severity': 'critical',
                     'title': 'Robots.txt blokuje całą stronę',
                     'impact': 10,
-                    'description': 'User-agent: * + Disallow: / blokuje indeksowanie',
+                    'description': 'User-agent: * ma Disallow: / (blokuje indeksowanie)',
                     'fix': 'NATYCHMIAST usuń lub popraw robots.txt!'
                 })
 
