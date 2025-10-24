@@ -10,7 +10,7 @@ from analyzers.content import analyze_content
 from analyzers.ai_content import analyze_ai_content, detect_page_language
 from analyzers.ai_action_plan import generate_ai_action_plan
 # Advanced SEO analyzers (2025)
-from analyzers.ai_serp_analysis import analyze_serp_position
+# from analyzers.ai_serp_analysis import analyze_serp_position  # DISABLED: Requires paid SERP API
 from analyzers.ai_intent_analysis import analyze_search_intent_match
 from analyzers.ai_eeat_analysis import analyze_eeat_signals
 from analyzers.ai_semantic_analysis import analyze_semantic_seo
@@ -307,15 +307,17 @@ def run_single_page_audit(url, page_data, html_content, detected_language='en'):
                 'insights': {}
             }
 
-            # 1. SERP & Competitive Analysis (with Google Search grounding)
-            print("    - SERP & Competitive analysis...")
-            try:
-                serp_result = analyze_serp_position(url, primary_keywords, language=detected_language)
-                advanced_seo['sub_scores']['serp'] = serp_result.get('competitive_score', 50)
-                advanced_seo['insights']['serp'] = serp_result
-            except Exception as e:
-                print(f"      Warning: SERP analysis failed: {e}")
-                advanced_seo['sub_scores']['serp'] = 50
+            # 1. SERP & Competitive Analysis - DISABLED (requires paid SERP API)
+            # Google Grounding API does not work like SerpAPI/DataForSEO
+            # User feedback: Remove this non-functional feature
+            # print("    - SERP & Competitive analysis...")
+            # try:
+            #     serp_result = analyze_serp_position(url, primary_keywords, language=detected_language)
+            #     advanced_seo['sub_scores']['serp'] = serp_result.get('competitive_score', 50)
+            #     advanced_seo['insights']['serp'] = serp_result
+            # except Exception as e:
+            #     print(f"      Warning: SERP analysis failed: {e}")
+            #     advanced_seo['sub_scores']['serp'] = 50
 
             # 2. Search Intent Match
             print("    - Search Intent analysis...")
