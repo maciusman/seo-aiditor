@@ -12,6 +12,7 @@ Analyzes if page content matches user search intent:
 import os
 import json
 from ai_engine import get_gemini_model
+from utils import extract_visible_text
 
 def analyze_search_intent_match(url, html_content, primary_keywords, language='en'):
     """
@@ -42,8 +43,9 @@ def analyze_search_intent_match(url, html_content, primary_keywords, language='e
 
     lang_instruction = lang_instructions.get(language, lang_instructions['en'])
 
-    # Truncate HTML to 100k characters (~75k words, well within 1M token limit)
-    html_excerpt = html_content[:100000]
+    # Extract visible text only (remove scripts, styles, metadata)
+    # This prevents AI from analyzing metadata instead of actual content
+    visible_text = extract_visible_text(html_content, max_length=50000)
 
     keywords_str = ", ".join(primary_keywords) if isinstance(primary_keywords, list) else primary_keywords
 
@@ -53,8 +55,8 @@ Analyze search intent match for: {url}
 
 Target keywords: {keywords_str}
 
-Full page HTML (analyze deeply):
-{html_excerpt}
+VISIBLE CONTENT (scripts/metadata removed):
+{visible_text}
 
 Tasks:
 
@@ -122,9 +124,10 @@ Return valid JSON:
 }}
 
 IMPORTANT:
-- Analyze the FULL HTML provided (not just excerpt)
-- Look at actual page elements (headings, CTAs, structure)
+- Analyze ONLY the visible content provided (metadata removed to prevent hallucinations)
+- Focus on actual user-facing content (headings, CTAs, body text)
 - Be specific about mismatches
+- Base analysis on what users actually see, not HTML metadata
 """
 
     try:
