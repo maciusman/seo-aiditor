@@ -231,11 +231,26 @@ Be specific, actionable, and brutally honest about opportunities and problems.
 
         # Use URL Context with multiple URLs
         # Note: We'll pass the primary URL and include others in the prompt
+        # Use longer timeout for multi-page analysis (120s instead of default 90s)
         response = ai.analyze_url(
             url=homepage_url,
             prompt=prompt + f"\n\nADDITIONAL PAGES TO ANALYZE: {', '.join(urls_to_analyze[1:])}",
-            use_url_context=True
+            use_url_context=True,
+            timeout=120  # 2 minutes for holistic analysis of 5 pages
         )
+
+        # Check if response contains error (from timeout or API failure)
+        try:
+            error_check = json.loads(response)
+            if 'error' in error_check:
+                print(f"[ERROR] AI returned error: {error_check['error']}")
+                return {
+                    'success': False,
+                    'error': error_check['error'],
+                    'holistic_score': 50
+                }
+        except (json.JSONDecodeError, ValueError):
+            pass  # Not an error JSON, continue with normal parsing
 
         # Clean and parse JSON response
         cleaned_response = response.strip()
@@ -272,6 +287,14 @@ Be specific, actionable, and brutally honest about opportunities and problems.
         return {
             'success': True,
             **result
+        }
+
+    except TimeoutError as e:
+        print(f"[ERROR] Multi-page analysis timeout: {str(e)}")
+        return {
+            'success': False,
+            'error': 'AI holistic analysis timed out (120s). This can happen with complex sites or API issues. Try again or reduce pages analyzed.',
+            'holistic_score': 50
         }
 
     except json.JSONDecodeError as e:

@@ -1,6 +1,22 @@
 # ai_engine.py - Centralny moduł AI (Gemini 2.5 Flash)
 import json
 from typing import Dict, Any, Optional
+import signal
+from contextlib import contextmanager
+
+@contextmanager
+def timeout_handler(seconds):
+    """Context manager for timeout handling (Unix only)"""
+    def signal_handler(signum, frame):
+        raise TimeoutError(f"Operation timed out after {seconds} seconds")
+
+    # Set signal handler (only works on Unix/Linux)
+    try:
+        signal.signal(signal.SIGALRM, signal_handler)
+        signal.alarm(seconds)
+        yield
+    finally:
+        signal.alarm(0)  # Disable alarm
 
 class AIAnalyzer:
     """Centralna klasa do analizy AI używając Gemini 2.5 Flash"""
@@ -17,6 +33,7 @@ class AIAnalyzer:
         self.model = model
         self.client = None
         self.tools = [{"url_context": {}}]  # URL Context enabled!
+        self.default_timeout = 90  # Default 90s timeout for AI operations
 
         # Initialize client
         self._initialize_client()
@@ -42,7 +59,7 @@ class AIAnalyzer:
         """Check if AI is available"""
         return self.client is not None and self.api_key != "YOUR_GEMINI_API_KEY_HERE"
 
-    def analyze_url(self, url: str, prompt: str, use_url_context: bool = True) -> str:
+    def analyze_url(self, url: str, prompt: str, use_url_context: bool = True, timeout: int = None) -> str:
         """
         Analyze URL with full page context using Gemini URL Context
 
@@ -50,12 +67,15 @@ class AIAnalyzer:
             url: URL to analyze (can be single URL or multiple URLs separated by commas)
             prompt: Analysis prompt
             use_url_context: Enable URL context tool (default: True)
+            timeout: Timeout in seconds (default: self.default_timeout = 90s)
 
         Returns:
             AI response text
         """
         if not self.is_available():
             return json.dumps({"error": "AI not available - check API key"})
+
+        timeout_seconds = timeout or self.default_timeout
 
         try:
             config_tools = self.tools if use_url_context else []
@@ -72,13 +92,29 @@ class AIAnalyzer:
                 # Only use response_mime_type if NOT using tools
                 config_params['response_mime_type'] = "application/json"
 
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=f"{prompt}\n\nURL to analyze: {url}",
-                config=self.GenerateContentConfig(**config_params)
-            )
+            # Use timeout handler (Unix/Linux only - will pass through on Windows)
+            try:
+                with timeout_handler(timeout_seconds):
+                    response = self.client.models.generate_content(
+                        model=self.model,
+                        contents=f"{prompt}\n\nURL to analyze: {url}",
+                        config=self.GenerateContentConfig(**config_params)
+                    )
+                    return response.text
+            except (AttributeError, ValueError):
+                # Windows doesn't support signal.SIGALRM - run without timeout
+                print(f"[WARNING] Timeout not supported on this OS - running without timeout")
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=f"{prompt}\n\nURL to analyze: {url}",
+                    config=self.GenerateContentConfig(**config_params)
+                )
+                return response.text
 
-            return response.text
+        except TimeoutError as e:
+            error_msg = f"AI analysis timeout after {timeout_seconds}s"
+            print(f"[ERROR] {error_msg}")
+            return json.dumps({"error": error_msg})
         except Exception as e:
             error_msg = str(e)
             print(f"[ERROR] AI Error: {error_msg}")
@@ -267,10 +303,10 @@ class AIEngine:
     def is_available(self):
         return self.analyzer is not None and self.analyzer.is_available()
 
-    def analyze_url(self, url: str, prompt: str, use_url_context: bool = True):
+    def analyze_url(self, url: str, prompt: str, use_url_context: bool = True, timeout: int = None):
         if not self.analyzer:
             return json.dumps({"error": "AI not available"})
-        return self.analyzer.analyze_url(url, prompt, use_url_context)
+        return self.analyzer.analyze_url(url, prompt, use_url_context, timeout)
 
     def analyze_multiple_urls(self, urls: list, prompt: str):
         if not self.analyzer:
