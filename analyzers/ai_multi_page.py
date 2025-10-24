@@ -247,7 +247,11 @@ Be specific, actionable, and brutally honest about opportunities and problems.
                 return {
                     'success': False,
                     'error': error_check['error'],
-                    'holistic_score': 50
+                    'holistic_score': 50,
+                    'executive_summary': f'Błąd podczas analizy: {error_check["error"]}',
+                    'template_insights': [],
+                    'scalable_recommendations': [],
+                    'cross_page_issues': []
                 }
         except (json.JSONDecodeError, ValueError):
             pass  # Not an error JSON, continue with normal parsing
@@ -276,13 +280,20 @@ Be specific, actionable, and brutally honest about opportunities and problems.
         result = json.loads(cleaned_response)
 
         # Validate required fields
-        required_fields = ['holistic_score', 'template_insights', 'scalable_recommendations']
-        for field in required_fields:
-            if field not in result:
-                return {
-                    'success': False,
-                    'error': f'AI response missing required field: {field}'
-                }
+        required_fields = ['holistic_score', 'executive_summary', 'template_insights', 'scalable_recommendations']
+        missing_fields = [field for field in required_fields if field not in result]
+
+        if missing_fields:
+            print(f"[WARNING] AI response missing fields: {missing_fields}")
+            # Add fallbacks for missing fields
+            if 'holistic_score' not in result:
+                result['holistic_score'] = 50
+            if 'executive_summary' not in result:
+                result['executive_summary'] = f"Przeanalizowano {len(pages_data) + 1} stron witryny typu {site_type}. Analiza holistyczna zakończona."
+            if 'template_insights' not in result:
+                result['template_insights'] = []
+            if 'scalable_recommendations' not in result:
+                result['scalable_recommendations'] = []
 
         return {
             'success': True,
@@ -294,7 +305,11 @@ Be specific, actionable, and brutally honest about opportunities and problems.
         return {
             'success': False,
             'error': 'AI holistic analysis timed out (120s). This can happen with complex sites or API issues. Try again or reduce pages analyzed.',
-            'holistic_score': 50
+            'holistic_score': 50,
+            'executive_summary': 'Analiza holistyczna przekroczyła limit czasu. Spróbuj ponownie.',
+            'template_insights': [],
+            'scalable_recommendations': [],
+            'cross_page_issues': []
         }
 
     except json.JSONDecodeError as e:
@@ -357,7 +372,12 @@ Be specific, actionable, and brutally honest about opportunities and problems.
         return {
             'success': False,
             'error': f'Failed to parse AI response as JSON: {str(e)}',
-            'raw_response': response[:1000] if 'response' in locals() else ''
+            'raw_response': response[:1000] if 'response' in locals() else '',
+            'holistic_score': 50,
+            'executive_summary': 'Nie udało się sparsować odpowiedzi AI. Dane mogły być niepełne.',
+            'template_insights': [],
+            'scalable_recommendations': [],
+            'cross_page_issues': []
         }
     except Exception as e:
         print(f"[ERROR] Holistic AI analysis failed: {str(e)}")
@@ -365,7 +385,12 @@ Be specific, actionable, and brutally honest about opportunities and problems.
         traceback.print_exc()
         return {
             'success': False,
-            'error': f'Holistic AI analysis failed: {str(e)}'
+            'error': f'Holistic AI analysis failed: {str(e)}',
+            'holistic_score': 50,
+            'executive_summary': f'Wystąpił nieoczekiwany błąd podczas analizy: {str(e)}',
+            'template_insights': [],
+            'scalable_recommendations': [],
+            'cross_page_issues': []
         }
 
 
